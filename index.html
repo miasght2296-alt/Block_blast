@@ -1,480 +1,1119 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Block Blast - Xếp Hình Kiểu Mới</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap');
-    
-    body {
-      font-family: 'Nunito', sans-serif;
-      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-      touch-action: none; /* Prevent scroll on drag */
-      overflow: hidden;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô phỏng AI Tự Học Bằng Đạo Hàm - Toán 12</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --border-color: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-green: #22c55e;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #a855f7;
+        }
 
-    .game-board {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      grid-template-rows: repeat(8, 1fr);
-      gap: 2px;
-      background-color: rgba(0, 0, 0, 0.2);
-      padding: 4px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
 
-    .cell {
-      width: 100%;
-      aspect-ratio: 1;
-      background-color: rgba(255, 255, 255, 0.1);
-      border-radius: 6px;
-      transition: background-color 0.1s;
-    }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding: 16px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
 
-    .cell.filled {
-      box-shadow: inset 0 0 10px rgba(255,255,255,0.2);
-    }
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--panel-bg);
+            padding: 14px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
 
-    .cell-preview {
-      background-color: rgba(255, 255, 255, 0.4) !important;
-    }
+        .title-group h1 {
+            font-size: 1.35rem;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-    .tray-container {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      height: 120px;
-      margin-top: 20px;
-    }
+        .title-group p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
 
-    .shape-container {
-      width: 100px;
-      height: 100px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-    }
+        /* Equation Bar */
+        .eq-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
 
-    .shape {
-      display: grid;
-      gap: 2px;
-      cursor: grab;
-      position: absolute;
-      /* Default scale in tray */
-      transform: scale(0.6);
-      transition: transform 0.1s;
-    }
+        .eq-input-group {
+            display: flex;
+            align-items: center;
+            background: #090d16;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 4px 10px;
+        }
 
-    .shape:active, .shape.dragging {
-      cursor: grabbing;
-      transform: scale(1);
-      z-index: 100;
-    }
+        .eq-input-group span {
+            color: var(--accent-amber);
+            font-weight: bold;
+            margin-right: 6px;
+            font-family: monospace;
+            font-size: 1rem;
+        }
 
-    .shape-block {
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      box-shadow: inset 0 0 8px rgba(255,255,255,0.3);
-    }
+        .eq-input-group input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-family: monospace;
+            font-size: 1rem;
+            width: 210px;
+            outline: none;
+        }
 
-    .anim-clear {
-      animation: popOut 0.3s forwards;
-    }
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-    @keyframes popOut {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.2); opacity: 0.8; }
-      100% { transform: scale(0); opacity: 0; }
-    }
+        .btn-primary {
+            background: var(--accent-blue);
+            color: #0f172a;
+        }
+        .btn-primary:hover { background: #7dd3fc; }
 
-    /* Colors for blocks */
-    .color-1 { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); }
-    .color-2 { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
-    .color-3 { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
-    .color-4 { background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%); }
-    .color-5 { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); }
-    .color-6 { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
-  </style>
+        .btn-success {
+            background: var(--accent-green);
+            color: #052e16;
+            font-size: 1rem;
+            padding: 10px 18px;
+        }
+        .btn-success:hover { background: #4ade80; }
+
+        .btn-warning {
+            background: var(--accent-amber);
+            color: #451a03;
+        }
+        .btn-warning:hover { background: #fbbf24; }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+        .btn-outline:hover, .btn-outline.active {
+            background: #334155;
+            border-color: var(--accent-blue);
+        }
+
+        /* Main Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 16px;
+            flex: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .panel-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Canvas Containers */
+        .canvas-wrap {
+            position: relative;
+            background: #090d16;
+            border-radius: 10px;
+            border: 1px solid #1e293b;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+        }
+
+        #graphCanvas {
+            height: 360px;
+            cursor: pointer;
+        }
+
+        #tankCanvas {
+            height: 210px;
+        }
+
+        .canvas-overlay-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 6px;
+        }
+
+        .mini-btn {
+            background: rgba(30, 41, 59, 0.85);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+        .mini-btn.active {
+            background: var(--accent-purple);
+            color: white;
+            border-color: var(--accent-purple);
+        }
+
+        /* AI Thought Bubble (Presenter Helper) */
+        .ai-thought-box {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+            border-left: 5px solid var(--accent-blue);
+            border-radius: 8px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+
+        .thought-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--accent-blue);
+            font-weight: 700;
+        }
+
+        .thought-content {
+            font-size: 1.05rem;
+            line-height: 1.5;
+            color: #ffffff;
+        }
+
+        .thought-rule {
+            margin-top: 4px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+        }
+
+        /* Controls Bar */
+        .controls-card {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .slider-group label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .slider-group input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent-blue);
+        }
+
+        /* History Log Table */
+        .history-container {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 220px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: #090d16;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            text-align: left;
+        }
+
+        th {
+            background: #1e293b;
+            color: var(--text-muted);
+            padding: 8px 10px;
+            position: sticky;
+            top: 0;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        tr:first-child td {
+            background: rgba(56, 189, 248, 0.12);
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 3px 8px;
+            border-radius: 99px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+        .badge-neg { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .badge-pos { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .badge-zero { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+
+        .Math-toggle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+    </style>
 </head>
-<body class="text-white min-h-screen flex flex-col items-center justify-center p-4">
+<body>
 
-  <div class="w-full max-w-[400px] flex justify-between items-center mb-6 px-2">
-    <div>
-      <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-500 drop-shadow-md">BLOCK BLAST</h1>
-      <p class="text-sm text-blue-200">Xếp hình kiểu mới</p>
+    <header>
+        <div class="title-group">
+            <h1>🎯 Đạo Hàm Trong Đời Sống: Cách AI Tự Sửa Sai Khi Tập Bắn</h1>
+            <p>Không cần công thức phức tạp — Hiểu ngay cách AI "mò đường" bằng bảng biến thiên và dấu của Đạo hàm!</p>
+        </div>
+
+        <div class="eq-bar">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Hàm mẫu:</span>
+            <button class="btn-outline active" onclick="setPreset('(x - 2)^2', -2.5)">Hàm Bậc 2 (Dễ hiểu)</button>
+            <button class="btn-outline" onclick="setPreset('0.15*x^4 - 0.2*x^3 - x^2 + 3', 0.4)">Hàm Bậc 4 (Bẫy Hố Nông)</button>
+            <button class="btn-outline" onclick="setPreset('0.3*x^2 - 1.5*cos(2*x) + 2', -3.2)">Hàm Lượng Giác</button>
+
+            <div class="eq-input-group">
+                <span>y = f(x) =</span>
+                <input type="text" id="eqInput" value="(x - 2)^2" placeholder="Nhập hàm bất kỳ theo x...">
+            </div>
+            <button class="btn-primary" onclick="applyCustomEquation()">Áp dụng hàm</button>
+        </div>
+    </header>
+
+    <div class="main-grid">
+        <!-- CỘT TRÁI: ĐỒ THỊ ĐẠO HÀM & BẢNG ĐIỀU KHIỂN -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    📈 1. Bản Đồ Độ Lệch y = f(x) & Độ Dốc Tiếp Tuyến f'(x)
+                </div>
+                <label class="Math-toggle">
+                    <input type="checkbox" id="showMathFormula" onchange="updateThoughtBubble()">
+                    Hiện công thức Toán nâng cao
+                </label>
+            </div>
+
+            <div class="canvas-wrap">
+                <canvas id="graphCanvas"></canvas>
+                <div class="canvas-overlay-controls">
+                    <button class="mini-btn" id="fogBtn" onclick="toggleFogMode()" title="Che đồ thị để thấy góc nhìn thực tế của AI">
+                        👁️ Góc nhìn của AI (Bịt mắt): TẮT
+                    </button>
+                    <button class="mini-btn" onclick="zoomGraph(0.8)">➕ Phóng to</button>
+                    <button class="mini-btn" onclick="zoomGraph(1.25)">➖ Thu nhỏ</button>
+                </div>
+            </div>
+
+            <!-- Hộp thoại suy nghĩ của AI (Cứu cánh cho người thuyết trình) -->
+            <div class="ai-thought-box" id="thoughtBox">
+                <div class="thought-header">
+                    <span id="stepStatusBadge">🤖 TRẠNG THÁI AI: ĐANG CHỜ LỆNH BẮN THỬ</span>
+                    <span id="shotCountText">Phát bắn thứ: 0</span>
+                </div>
+                <div class="thought-content" id="aiNarrative">
+                    Hãy bấm nút <b>"Bắn Thử & Tự Sửa (1 Bước)"</b> hoặc click lên đồ thị để chọn đại một Lực bắn ban đầu cho AI!
+                </div>
+                <div class="thought-rule" id="aiRuleExplain">
+                    💡 <b>Quy tắc cốt lõi:</b> Đạo hàm <b>f'(x) Âm</b> (dốc chúc xuống) 👉 Tăng lực (sang phải) | Đạo hàm <b>f'(x) Dương</b> (dốc hướng lên) 👉 Giảm lực (sang trái).
+                </div>
+            </div>
+
+            <!-- Thanh điều khiển -->
+            <div class="controls-card">
+                <div class="action-buttons">
+                    <button class="btn-success" id="autoBtn" onclick="toggleAutoPlay()">
+                        ▶️ AI Tự Học Liên Tục (Thử & Sai)
+                    </button>
+                    <button class="btn-warning" onclick="triggerSingleShot()">
+                        🔫 Bắn Thử & Tự Sửa (1 Bước)
+                    </button>
+                    <button class="btn-outline" onclick="resetRandom()">
+                        🎲 Đặt Lại Vị Trí Ngẫu Nhiên
+                    </button>
+                </div>
+
+                <div class="slider-row">
+                    <div class="slider-group">
+                        <label>Mức độ chỉnh lực mỗi lần ($\alpha$): <b id="lrVal" style="color:var(--accent-blue)">Vừa phải (0.20)</b></label>
+                        <input type="range" id="lrSlider" min="0.02" max="1.05" step="0.02" value="0.20" oninput="updateLR(this.value)">
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="mini-btn" onclick="setLRPreset(0.05)">Nhích từng tí (0.05)</button>
+                        <button class="mini-btn" onclick="setLRPreset(0.20)">Chuẩn (0.20)</button>
+                        <button class="mini-btn" onclick="setLRPreset(1.02)">Chỉnh lố đà (1.02)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: XE TĂNG BẮN THử & NHẬT KÝ SỬA SAI -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    💥 2. Mô Phỏng Thực Tế: Xe Tăng AI Tập Bắn Mục Tiêu
+                </div>
+                <span style="font-size: 0.85rem; color: var(--accent-green); font-weight:600;" id="targetInfoText">
+                    Mục tiêu cần lực chuẩn: x* = 2.00
+                </span>
+            </div>
+
+            <div class="canvas-wrap">
+                <canvas id="tankCanvas"></canvas>
+            </div>
+
+            <div class="panel-header" style="margin-top: 4px;">
+                <div class="panel-title">
+                    📋 3. Nhật Ký Quá Trình "Mò Đường" Của AI (Đọc theo bảng này)
+                </div>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Mới nhất ở trên cùng</span>
+            </div>
+
+            <div class="history-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lần</th>
+                            <th>Lực bắn (x)</th>
+                            <th>Kết quả bắn</th>
+                            <th>Độ dốc / Đạo hàm f'(x)</th>
+                            <th>Quyết định của AI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <tr>
+                            <td colspan="5" style="text-align:center; color: var(--text-muted); padding: 20px;">
+                                Chưa có phát bắn nào. Hãy bấm nút "AI Tự Học" hoặc "Bắn Thử" để xem AI tự sửa sai!
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-    <div class="text-right">
-      <div class="text-blue-200 text-xs font-bold uppercase tracking-wider">Điểm số</div>
-      <div id="scoreDisplay" class="text-3xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">0</div>
-    </div>
-  </div>
 
-  <div class="w-full max-w-[400px]">
-    <div id="board" class="game-board">
-      <!-- 64 cells generated by JS -->
-    </div>
-  </div>
+<script>
+    // ================= CẤU HÌNH TOÁN HỌC & TRẠNG THÁI =================
+    let rawExpr = "(x - 2)^2";
+    let compiledExpr = "";
+    let currentX = -2.5;
+    let targetX = 2.0;
+    let targetY = 0.0;
+    let learningRate = 0.20;
+    let shotCount = 0;
+    let historyPoints = []; // Lưu vết các điểm trên đồ thị
+    let fogMode = false;
+    let xRange = 6.0; // Phạm vi trục X (-6 đến +6)
 
-  <div class="w-full max-w-[400px]">
-    <div id="tray" class="tray-container">
-      <div class="shape-container" id="slot-0"></div>
-      <div class="shape-container" id="slot-1"></div>
-      <div class="shape-container" id="slot-2"></div>
-    </div>
-  </div>
+    // Trạng thái hoạt ảnh Bắn -> Nổ -> Suy nghĩ -> Bước
+    let isAutoPlaying = false;
+    let animPhase = "IDLE"; // IDLE, FLYING, EXPLODED, MOVING
+    let projectile = { progress: 0, startX: 0, endX: 0 };
+    let explosionTimer = 0;
+    let moveAnim = { progress: 0, fromX: 0, toX: 0 };
 
-  <!-- Game Over Screen -->
-  <div id="gameOverScreen" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center hidden backdrop-blur-sm z-[200]">
-    <h2 class="text-5xl font-black text-red-500 mb-2 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]">HẾT NƯỚC ĐI</h2>
-    <p class="text-xl text-white mb-8">Điểm của bạn: <span id="finalScore" class="font-bold text-yellow-400">0</span></p>
-    <button onclick="initGame()" class="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full font-bold text-xl shadow-lg shadow-blue-500/50 hover:scale-105 active:scale-95 transition-transform">
-      Chơi Lại
-    </button>
-  </div>
+    const graphCanvas = document.getElementById('graphCanvas');
+    const gCtx = graphCanvas.getContext('2d');
+    const tankCanvas = document.getElementById('tankCanvas');
+    const tCtx = tankCanvas.getContext('2d');
 
-  <script>
-    const BOARD_SIZE = 8;
-    const boardEl = document.getElementById('board');
-    const scoreEl = document.getElementById('scoreDisplay');
-    const gameOverScreen = document.getElementById('gameOverScreen');
-    const finalScoreEl = document.getElementById('finalScore');
-    
-    let board = [];
-    let score = 0;
-    let currentShapes = [];
-    let draggingShape = null;
-    let dragOffsetX = 0;
-    let dragOffsetY = 0;
-    
-    // Cell size roughly calculated for math
-    let CELL_PIXEL_SIZE = 40; 
-    let BOARD_RECT = null;
-
-    // Define shapes (matrix form)
-    const SHAPES = [
-      { mat: [[1]], color: 'color-1' }, // 1x1
-      { mat: [[1,1]], color: 'color-2' }, // 2x1
-      { mat: [[1],[1]], color: 'color-2' }, // 1x2
-      { mat: [[1,1,1]], color: 'color-3' }, // 3x1
-      { mat: [[1],[1],[1]], color: 'color-3' }, // 1x3
-      { mat: [[1,1,1,1]], color: 'color-4' }, // 4x1
-      { mat: [[1],[1],[1],[1]], color: 'color-4' }, // 1x4
-      { mat: [[1,1],[1,1]], color: 'color-5' }, // 2x2
-      { mat: [[1,1,1],[1,1,1],[1,1,1]], color: 'color-6' }, // 3x3
-      { mat: [[1,1],[1,0]], color: 'color-1' }, // L-small
-      { mat: [[1,1],[0,1]], color: 'color-1' }, 
-      { mat: [[1,0],[1,1]], color: 'color-1' }, 
-      { mat: [[0,1],[1,1]], color: 'color-1' },
-      { mat: [[1,1,1],[1,0,0],[1,0,0]], color: 'color-4' }, // L-large
-      { mat: [[1,1,1],[0,0,1],[0,0,1]], color: 'color-4' },
-      { mat: [[0,0,1],[0,0,1],[1,1,1]], color: 'color-4' },
-      { mat: [[1,0,0],[1,0,0],[1,1,1]], color: 'color-4' }
-    ];
-
-    function initGame() {
-      board = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(0));
-      score = 0;
-      updateScore(0);
-      gameOverScreen.classList.add('hidden');
-      createBoardUI();
-      fillTray();
-      
-      // Calculate sizes after rendering
-      setTimeout(() => {
-        BOARD_RECT = boardEl.getBoundingClientRect();
-        const firstCell = boardEl.children[0].getBoundingClientRect();
-        CELL_PIXEL_SIZE = firstCell.width + 2; // +gap
-      }, 100);
+    // ================= BỘ BIÊN DỊCH HÀM SỐ BẤT KỲ =================
+    function compileMathExpression(str) {
+        let s = str.toLowerCase().replace(/\s+/g, '');
+        // Đổi lũy thừa ^ thành **
+        s = s.replace(/\^/g, '**');
+        // Thêm dấu nhân ngầm định: 2x -> 2*x, )x -> )*x, 2( -> 2*(
+        s = s.replace(/(\d)(x)/g, '$1*$2');
+        s = s.replace(/(\d)(\()/g, '$1*$2');
+        s = s.replace(/(\))(x|\d|\()/g, '$1*$2');
+        s = s.replace(/(x)(\()/g, '$1*$2');
+        // Thay các hàm toán học phổ biến
+        s = s.replace(/sin\(/g, 'Math.sin(');
+        s = s.replace(/cos\(/g, 'Math.cos(');
+        s = s.replace(/tan\(/g, 'Math.tan(');
+        s = s.replace(/abs\(/g, 'Math.abs(');
+        s = s.replace(/sqrt\(/g, 'Math.sqrt(');
+        s = s.replace(/exp\(/g, 'Math.exp(');
+        s = s.replace(/ln\(/g, 'Math.log(');
+        return s;
     }
 
-    function createBoardUI() {
-      boardEl.innerHTML = '';
-      for (let r = 0; r < BOARD_SIZE; r++) {
-        for (let c = 0; c < BOARD_SIZE; c++) {
-          const cell = document.createElement('div');
-          cell.className = 'cell';
-          cell.dataset.r = r;
-          cell.dataset.c = c;
-          boardEl.appendChild(cell);
+    function f(x) {
+        try {
+            const fn = new Function('x', `return ${compiledExpr};`);
+            const val = fn(x);
+            return isFinite(val) ? val : 0;
+        } catch (e) {
+            return 0;
         }
-      }
     }
 
-    function getRandomShape() {
-      const template = SHAPES[Math.floor(Math.random() * SHAPES.length)];
-      return JSON.parse(JSON.stringify(template)); // deep copy
+    // Tính đạo hàm bằng định nghĩa giới hạn (Sai phân trung tâm)
+    function df(x) {
+        const h = 0.00001;
+        return (f(x + h) - f(x - h)) / (2 * h);
     }
 
-    function fillTray() {
-      currentShapes = [getRandomShape(), getRandomShape(), getRandomShape()];
-      renderTray();
-      checkGameOver();
-    }
-
-    function renderTray() {
-      for (let i = 0; i < 3; i++) {
-        const slot = document.getElementById(`slot-${i}`);
-        slot.innerHTML = '';
-        const shape = currentShapes[i];
-        if (shape) {
-          const shapeEl = document.createElement('div');
-          shapeEl.className = 'shape';
-          
-          const rows = shape.mat.length;
-          const cols = shape.mat[0].length;
-          shapeEl.style.gridTemplateColumns = `repeat(${cols}, 32px)`;
-          shapeEl.style.gridTemplateRows = `repeat(${rows}, 32px)`;
-
-          for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-              const block = document.createElement('div');
-              if (shape.mat[r][c]) {
-                block.className = `shape-block ${shape.color}`;
-              }
-              shapeEl.appendChild(block);
+    // Tự động quét tìm đáy thấp nhất (Cực tiểu toàn cục) để đặt Cờ Đích
+    function findGlobalMinimum() {
+        let bestX = 0;
+        let minY = Infinity;
+        for (let x = -8; x <= 8; x += 0.02) {
+            let y = f(x);
+            if (y < minY) {
+                minY = y;
+                bestX = x;
             }
-          }
-
-          shapeEl.addEventListener('pointerdown', (e) => startDrag(e, shape, i, shapeEl));
-          slot.appendChild(shapeEl);
         }
-      }
-    }
-
-    function startDrag(e, shape, index, shapeEl) {
-      if(draggingShape) return;
-      e.preventDefault();
-      
-      // Set to absolute position attached to body
-      const rect = shapeEl.getBoundingClientRect();
-      // Offset so the shape centers above the finger
-      dragOffsetX = rect.width / 2;
-      dragOffsetY = rect.height / 2 + 30; // 30px offset so finger doesn't hide it
-      
-      draggingShape = { shape, index, el: shapeEl, startSlot: shapeEl.parentElement };
-      
-      document.body.appendChild(shapeEl);
-      shapeEl.classList.add('dragging');
-      
-      moveDrag(e);
-      
-      document.addEventListener('pointermove', moveDrag);
-      document.addEventListener('pointerup', endDrag);
-    }
-
-    function moveDrag(e) {
-      if (!draggingShape) return;
-      const x = e.clientX;
-      const y = e.clientY;
-      
-      draggingShape.el.style.left = `${x - dragOffsetX}px`;
-      draggingShape.el.style.top = `${y - dragOffsetY}px`;
-
-      updatePreview(x, y);
-    }
-
-    function getGridHoverPos(clientX, clientY) {
-      if (!BOARD_RECT) BOARD_RECT = boardEl.getBoundingClientRect();
-      
-      // Calculate top-left of the shape based on current finger pos
-      const shapeRect = draggingShape.el.getBoundingClientRect();
-      
-      // Check if shape is over the board
-      const boardLeft = BOARD_RECT.left;
-      const boardTop = BOARD_RECT.top;
-      
-      // Get relative position of the top-left block of the shape to the board
-      // Use the center of the top-left block of the shape to determine row/col
-      const targetX = shapeRect.left + 16; 
-      const targetY = shapeRect.top + 16;
-
-      if (targetX >= boardLeft && targetX <= BOARD_RECT.right &&
-          targetY >= boardTop && targetY <= BOARD_RECT.bottom) {
-          
-          const col = Math.floor((targetX - boardLeft) / CELL_PIXEL_SIZE);
-          const row = Math.floor((targetY - boardTop) / CELL_PIXEL_SIZE);
-          return {r: row, c: col};
-      }
-      return null;
-    }
-
-    function canPlace(shapeMat, row, col) {
-      for (let r = 0; r < shapeMat.length; r++) {
-        for (let c = 0; c < shapeMat[0].length; c++) {
-          if (shapeMat[r][c]) {
-            const br = row + r;
-            const bc = col + c;
-            if (br < 0 || br >= BOARD_SIZE || bc < 0 || bc >= BOARD_SIZE || board[br][bc] !== 0) {
-              return false;
-            }
-          }
+        // Tinh chỉnh bằng vài bước đạo hàm nhỏ quanh bestX
+        for (let i = 0; i < 15; i++) {
+            bestX = bestX - 0.05 * df(bestX);
         }
-      }
-      return true;
+        targetX = bestX;
+        targetY = f(targetX);
+        document.getElementById('targetInfoText').innerText = `Mục tiêu cần lực chuẩn: x* ≈ ${targetX.toFixed(2)}`;
     }
 
-    function updatePreview(x, y) {
-      // Clear old previews
-      document.querySelectorAll('.cell').forEach(c => c.classList.remove('cell-preview'));
-      
-      const pos = getGridHoverPos(x, y);
-      if (pos && canPlace(draggingShape.shape.mat, pos.r, pos.c)) {
-        // Draw new preview
-        const mat = draggingShape.shape.mat;
-        for (let r = 0; r < mat.length; r++) {
-          for (let c = 0; c < mat[0].length; c++) {
-            if (mat[r][c]) {
-              const cell = boardEl.children[(pos.r + r) * BOARD_SIZE + (pos.c + c)];
-              cell.classList.add('cell-preview');
-            }
-          }
+    // ================= XỬ LÝ SỰ KIỆN GIAO DIỆN =================
+    function setPreset(expr, startX) {
+        document.getElementById('eqInput').value = expr;
+        document.querySelectorAll('.eq-bar .btn-outline').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        applyEquationInternal(expr, startX);
+    }
+
+    function applyCustomEquation() {
+        const expr = document.getElementById('eqInput').value;
+        applyEquationInternal(expr, -2.5);
+    }
+
+    function applyEquationInternal(expr, startX) {
+        stopAutoPlay();
+        rawExpr = expr;
+        compiledExpr = compileMathExpression(expr);
+        // Kiểm tra lỗi cú pháp
+        try {
+            const test = new Function('x', `return ${compiledExpr};`)(1);
+            if (isNaN(test)) throw new Error("NaN");
+        } catch (err) {
+            alert("Hàm số nhập vào chưa đúng cú pháp! Ví dụ hợp lệ: x^2 - 4x + 4 hoặc sin(x) + 0.5*x^2");
+            return;
         }
-      }
+        findGlobalMinimum();
+        resetToPosition(startX);
     }
 
-    function endDrag(e) {
-      if (!draggingShape) return;
-      document.removeEventListener('pointermove', moveDrag);
-      document.removeEventListener('pointerup', endDrag);
+    function resetRandom() {
+        stopAutoPlay();
+        // Chọn vị trí ngẫu nhiên cách xa mục tiêu để thấy rõ quá trình học
+        let randX = (Math.random() * 8) - 4;
+        if (Math.abs(randX - targetX) < 1.5) randX = targetX - 3.0;
+        resetToPosition(randX);
+    }
 
-      const pos = getGridHoverPos(e.clientX, e.clientY);
-      document.querySelectorAll('.cell').forEach(c => c.classList.remove('cell-preview'));
+    function resetToPosition(newX) {
+        currentX = newX;
+        shotCount = 0;
+        historyPoints = [{ x: currentX, y: f(currentX) }];
+        animPhase = "IDLE";
+        document.getElementById('historyBody').innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align:center; color: var(--text-muted); padding: 18px;">
+                    Đã đặt AI ở lực bắn <b>x = ${currentX.toFixed(2)}</b>. Hãy bấm "Bắn Thử" hoặc "AI Tự Học"!
+                </td>
+            </tr>
+        `;
+        updateThoughtBubble(true);
+    }
 
-      if (pos && canPlace(draggingShape.shape.mat, pos.r, pos.c)) {
-        // Place it
-        placeShape(draggingShape.shape, pos.r, pos.c);
-        currentShapes[draggingShape.index] = null;
-        draggingShape.el.remove();
-        
-        // Add score for placing
-        const blocksCount = draggingShape.shape.mat.flat().filter(v => v).length;
-        updateScore(blocksCount);
-        
-        checkLines();
-        
-        // If all shapes used, refill
-        if (currentShapes.every(s => s === null)) {
-          fillTray();
+    function updateLR(val) {
+        learningRate = parseFloat(val);
+        let desc = "Vừa phải";
+        if (learningRate < 0.08) desc = "Nhích từng tí";
+        else if (learningRate > 0.8) desc = "Quá lớn - Dễ văng lố";
+        document.getElementById('lrVal').innerText = `${desc} (${learningRate.toFixed(2)})`;
+    }
+
+    function setLRPreset(val) {
+        document.getElementById('lrSlider').value = val;
+        updateLR(val);
+    }
+
+    function toggleFogMode() {
+        fogMode = !fogMode;
+        const btn = document.getElementById('fogBtn');
+        btn.classList.toggle('active', fogMode);
+        btn.innerText = fogMode ? "👁️ Góc nhìn của AI (Bịt mắt): BẬT" : "👁️ Góc nhìn của AI (Bịt mắt): TẮT";
+    }
+
+    function zoomGraph(factor) {
+        xRange = Math.max(2, Math.min(20, xRange * factor));
+    }
+
+    // Cho phép click trực tiếp lên đồ thị để chọn vị trí xuất phát
+    graphCanvas.addEventListener('click', (e) => {
+        const rect = graphCanvas.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const mathX = ((clickX / graphCanvas.width) - 0.5) * 2 * xRange;
+        stopAutoPlay();
+        resetToPosition(mathX);
+    });
+
+    // ================= CHU TRÌNH: BẮN -> SAI -> TÍNH ĐẠO HÀM -> SỬA =================
+    function toggleAutoPlay() {
+        isAutoPlaying = !isAutoPlaying;
+        const btn = document.getElementById('autoBtn');
+        if (isAutoPlaying) {
+            btn.innerHTML = "⏸️ Tạm Dừng Tự Học";
+            btn.style.background = "#ef4444";
+            btn.style.color = "#fff";
+            if (animPhase === "IDLE") startShotCycle();
         } else {
-          checkGameOver();
+            stopAutoPlay();
         }
-      } else {
-        // Return to tray
-        draggingShape.startSlot.appendChild(draggingShape.el);
-        draggingShape.el.style.left = '';
-        draggingShape.el.style.top = '';
-        draggingShape.el.classList.remove('dragging');
-      }
-
-      draggingShape = null;
     }
 
-    function placeShape(shape, row, col) {
-      const mat = shape.mat;
-      for (let r = 0; r < mat.length; r++) {
-        for (let c = 0; c < mat[0].length; c++) {
-          if (mat[r][c]) {
-            board[row + r][col + c] = shape.color;
-            const cell = boardEl.children[(row + r) * BOARD_SIZE + (col + c)];
-            cell.className = `cell filled ${shape.color}`;
-          }
-        }
-      }
+    function stopAutoPlay() {
+        isAutoPlaying = false;
+        const btn = document.getElementById('autoBtn');
+        btn.innerHTML = "▶️ AI Tự Học Liên Tục (Thử & Sai)";
+        btn.style.background = "var(--accent-green)";
+        btn.style.color = "#052e16";
     }
 
-    function checkLines() {
-      let rowsToClear = [];
-      let colsToClear = [];
-
-      // Check rows
-      for (let r = 0; r < BOARD_SIZE; r++) {
-        if (board[r].every(c => c !== 0)) rowsToClear.push(r);
-      }
-      
-      // Check cols
-      for (let c = 0; c < BOARD_SIZE; c++) {
-        let full = true;
-        for (let r = 0; r < BOARD_SIZE; r++) {
-          if (board[r][c] === 0) full = false;
+    function triggerSingleShot() {
+        stopAutoPlay();
+        if (animPhase === "IDLE") {
+            startShotCycle();
         }
-        if (full) colsToClear.push(c);
-      }
+    }
 
-      if (rowsToClear.length === 0 && colsToClear.length === 0) return;
+    function startShotCycle() {
+        shotCount++;
+        animPhase = "FLYING";
+        projectile.progress = 0;
+        updateThoughtBubble();
+    }
 
-      // Calculate combos
-      const totalLines = rowsToClear.length + colsToClear.length;
-      updateScore(totalLines * 10 * totalLines); // Combo multiplier
+    // Cập nhật hộp thoại giải thích và bảng lịch sử
+    function updateThoughtBubble(isInit = false) {
+        const slope = df(currentX);
+        const yVal = f(currentX);
+        const showMath = document.getElementById('showMathFormula').checked;
+        const badge = document.getElementById('stepStatusBadge');
+        const narrative = document.getElementById('aiNarrative');
+        const ruleBox = document.getElementById('aiRuleExplain');
+        document.getElementById('shotCountText').innerText = `Phát bắn thứ: ${shotCount}`;
 
-      // Animate and clear
-      rowsToClear.forEach(r => {
-        for(let c=0; c<BOARD_SIZE; c++) {
-           const cell = boardEl.children[r * BOARD_SIZE + c];
-           cell.classList.add('anim-clear');
-           board[r][c] = 0;
+        if (isInit) {
+            badge.innerText = "🤖 TRẠNG THÁI AI: SẴN SÀNG KHAI HỎA";
+            badge.style.color = "var(--accent-blue)";
+            narrative.innerHTML = `AI đang chọn đại lực bắn ban đầu <b>x = ${currentX.toFixed(2)}</b>. Nó chưa biết mục tiêu ở đâu. Hãy bấm bắn thử để xem đạn rơi chỗ nào!`;
+            return;
         }
-      });
-      
-      colsToClear.forEach(c => {
-        for(let r=0; r<BOARD_SIZE; r++) {
-           const cell = boardEl.children[r * BOARD_SIZE + c];
-           cell.classList.add('anim-clear');
-           board[r][c] = 0;
-        }
-      });
 
-      setTimeout(() => {
-        // Reset classes
-        for(let r=0; r<BOARD_SIZE; r++) {
-          for(let c=0; c<BOARD_SIZE; c++) {
-            if(board[r][c] === 0) {
-              boardEl.children[r * BOARD_SIZE + c].className = 'cell';
+        const isHit = Math.abs(slope) < 0.05 && Math.abs(currentX - targetX) < 0.15;
+        const isLocalTrap = Math.abs(slope) < 0.05 && Math.abs(currentX - targetX) >= 0.15;
+
+        if (animPhase === "FLYING") {
+            badge.innerText = "🚀 BƯỚC 1: XE TĂNG ĐANG BẮN THỬ...";
+            badge.style.color = "var(--accent-amber)";
+            narrative.innerHTML = `Đang khai hỏa với lực bắn <b>x = ${currentX.toFixed(2)}</b>... Cùng xem viên đạn rơi lệch mục tiêu bao xa!`;
+        } else if (animPhase === "EXPLODED" || animPhase === "MOVING" || animPhase === "IDLE") {
+            if (isHit) {
+                badge.innerText = "🏆 HOÀN HẢO: ĐẠO HÀM = 0 (ĐÃ TỚI ĐÁY THUNG LŨNG!)";
+                badge.style.color = "var(--accent-green)";
+                narrative.innerHTML = `<b>TRÚNG HỒNG TÂM!</b> Tại <b>x = ${currentX.toFixed(2)}</b>, mặt đất dưới chân AI đã phẳng lì (Đạo hàm <b>f'(x) ≈ 0</b>). AI biết mình đã ở đáy cực tiểu nên dừng lại không chỉnh nữa!`;
+            } else if (isLocalTrap) {
+                badge.innerText = "⚠️ CẢNH BÁO: MẮC KẸT Ở BẪY CỰC TIỂU ĐỊA PHƯƠNG!";
+                badge.style.color = "var(--accent-red)";
+                narrative.innerHTML = `Tại <b>x = ${currentX.toFixed(2)}</b>, đạo hàm cũng bằng <b>0</b> (đáy hố nông), làm AI tưởng đã bắn trúng và dừng lại! Trong Toán 12, đây là <b>Cực tiểu địa phương</b> chứ chưa phải giá trị nhỏ nhất toàn cục.`;
+            } else if (slope < 0) {
+                badge.innerText = "📉 BƯỚC 2 & 3: PHÁT HIỆN ĐẠO HÀM ÂM -> TỰ ĐỘNG TĂNG LỰC!";
+                badge.style.color = "var(--accent-amber)";
+                let nextX = currentX - learningRate * slope;
+                narrative.innerHTML = `Đạn rơi chưa tới đích! AI đo độ nghiêng tại chỗ đứng thấy <b>Đạo hàm f'(${currentX.toFixed(2)}) = ${slope.toFixed(2)} < 0 (Âm)</b> — tức là dốc đang đi xuống về bên phải. <br>👉 <b>AI tự sửa:</b> Tăng lực bắn sang phải (từ <b>${currentX.toFixed(2)}</b> lên <b>${nextX.toFixed(2)}</b>).`;
+            } else {
+                badge.innerText = "📈 BƯỚC 2 & 3: PHÁT HIỆN ĐẠO HÀM DƯƠNG -> TỰ ĐỘNG GIẢM LỰC!";
+                badge.style.color = "var(--accent-red)";
+                let nextX = currentX - learningRate * slope;
+                narrative.innerHTML = `Đạn bắn vọt lố mục tiêu! AI đo độ nghiêng thấy <b>Đạo hàm f'(${currentX.toFixed(2)}) = +${slope.toFixed(2)} > 0 (Dương)</b> — tức là dốc đang đi lên về bên phải. <br>👉 <b>AI tự sửa:</b> Giảm lực bắn lùi sang trái (từ <b>${currentX.toFixed(2)}</b> về <b>${nextX.toFixed(2)}</b>).`;
             }
-          }
         }
-      }, 300);
+
+        if (showMath) {
+            let nextX = currentX - learningRate * slope;
+            ruleBox.innerHTML = `📐 <b>Công thức Gradient Descent:</b> x<sub>mới</sub> = x<sub>cũ</sub> - α · f'(x<sub>cũ</sub>) = ${currentX.toFixed(2)} - (${learningRate}) · (${slope.toFixed(2)}) = <b>${nextX.toFixed(2)}</b>`;
+        } else {
+            ruleBox.innerHTML = `💡 <b>Mẹo thuyết trình:</b> Chỉ cần nhớ quy tắc <b>"Đi ngược dấu Đạo hàm"</b> — Đạo hàm Âm thì tiến sang phải (+), Đạo hàm Dương thì lùi sang trái (-)!`;
+        }
     }
 
-    function checkGameOver() {
-      // Check if ANY of the current shapes can be placed ANYWHERE
-      let canPlay = false;
-      
-      for (let s of currentShapes) {
-        if (s === null) continue;
-        for (let r = 0; r < BOARD_SIZE; r++) {
-          for (let c = 0; c < BOARD_SIZE; c++) {
-            if (canPlace(s.mat, r, c)) {
-              canPlay = true;
-              break;
+    function appendHistoryLog(shotNum, xVal, slopeVal, nextXVal) {
+        const tbody = document.getElementById('historyBody');
+        if (shotNum === 1) tbody.innerHTML = "";
+
+        const diff = xVal - targetX;
+        let resultText = "";
+        if (Math.abs(diff) < 0.15) {
+            resultText = `<span style="color:var(--accent-green); font-weight:bold;">🎯 Trúng đích!</span>`;
+        } else if (diff < 0) {
+            resultText = `<span style="color:var(--accent-amber);">Hụt ${Math.abs(diff).toFixed(2)}m (Non lực)</span>`;
+        } else {
+            resultText = `<span style="color:var(--accent-red);">Lố +${diff.toFixed(2)}m (Dư lực)</span>`;
+        }
+
+        let slopeBadge = "";
+        let actionText = "";
+        if (Math.abs(slopeVal) < 0.05) {
+            slopeBadge = `<span class="badge badge-zero">f'(x) ≈ 0 (Đáy phẳng)</span>`;
+            actionText = `✅ Giữ nguyên lực bắn`;
+        } else if (slopeVal < 0) {
+            slopeBadge = `<span class="badge badge-neg">f'(x) = ${slopeVal.toFixed(2)} (Âm ↘)</span>`;
+            actionText = `👉 <b>Tăng lực</b> lên ${nextXVal.toFixed(2)}`;
+        } else {
+            slopeBadge = `<span class="badge badge-pos">f'(x) = +${slopeVal.toFixed(2)} (Dương ↗)</span>`;
+            actionText = `👈 <b>Giảm lực</b> về ${nextXVal.toFixed(2)}`;
+        }
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>#${shotNum}</td>
+            <td><b>${xVal.toFixed(2)}</b></td>
+            <td>${resultText}</td>
+            <td>${slopeBadge}</td>
+            <td>${actionText}</td>
+        `;
+        tbody.prepend(row);
+    }
+
+    // ================= VẼ ĐỒ THỊ HÀM SỐ & TIẾP TUYẾN =================
+    function drawGraph() {
+        const w = graphCanvas.width = graphCanvas.clientWidth;
+        const h = graphCanvas.height = graphCanvas.clientHeight;
+        gCtx.clearRect(0, 0, w, h);
+
+        // Chuyển đổi tọa độ Toán <-> Pixel
+        const yMin = targetY - 1.5;
+        const yMax = targetY + xRange * 1.8;
+        const toPxX = (x) => ((x / xRange) * 0.5 + 0.5) * w;
+        const toPxY = (y) => h - ((y - yMin) / (yMax - yMin)) * h;
+
+        // 1. Vẽ lưới tọa độ
+        gCtx.strokeStyle = "#1e293b";
+        gCtx.lineWidth = 1;
+        for (let gx = Math.ceil(-xRange); gx <= Math.floor(xRange); gx++) {
+            let px = toPxX(gx);
+            gCtx.beginPath(); gCtx.moveTo(px, 0); gCtx.lineTo(px, h); gCtx.stroke();
+            gCtx.fillStyle = "#64748b";
+            gCtx.font = "11px sans-serif";
+            gCtx.fillText(gx, px + 3, toPxY(0) - 5);
+        }
+
+        // Trục Ox, Oy
+        gCtx.strokeStyle = "#475569";
+        gCtx.lineWidth = 1.5;
+        gCtx.beginPath();
+        gCtx.moveTo(0, toPxY(0)); gCtx.lineTo(w, toPxY(0));
+        gCtx.moveTo(toPxX(0), 0); gCtx.lineTo(toPxX(0), h);
+        gCtx.stroke();
+
+        // 2. Vẽ đường cong hàm số y = f(x)
+        gCtx.save();
+        if (fogMode) {
+            // Nếu bật chế độ Bịt mắt AI: Chỉ mở vùng sáng nhỏ quanh viên bi
+            gCtx.beginPath();
+            gCtx.arc(toPxX(currentX), toPxY(f(currentX)), 78, 0, Math.PI * 2);
+            gCtx.clip();
+        }
+
+        gCtx.strokeStyle = "#38bdf8";
+        gCtx.lineWidth = 3;
+        gCtx.beginPath();
+        for (let px = 0; px <= w; px += 2) {
+            let mathX = ((px / w) - 0.5) * 2 * xRange;
+            let mathY = f(mathX);
+            let py = toPxY(mathY);
+            if (px === 0) gCtx.moveTo(px, py);
+            else gCtx.lineTo(px, py);
+        }
+        gCtx.stroke();
+        gCtx.restore();
+
+        // Nếu bật Fog Mode, vẽ lớp sương mù chú thích
+        if (fogMode) {
+            gCtx.fillStyle = "rgba(15, 23, 42, 0.55)";
+            gCtx.font = "bold 13px sans-serif";
+            gCtx.fillStyle = "#c084fc";
+            gCtx.fillText("🙈 AI không thấy toàn bộ đồ thị! Nó chỉ cảm nhận được độ nghiêng (đạo hàm) ngay dưới chân.", 16, 28);
+        }
+
+        // 3. Vẽ Cờ Đích tại đáy Cực Tiểu
+        const flagX = toPxX(targetX);
+        const flagY = toPxY(targetY);
+        gCtx.strokeStyle = "#22c55e";
+        gCtx.lineWidth = 2;
+        gCtx.beginPath();
+        gCtx.moveTo(flagX, flagY);
+        gCtx.lineTo(flagX, flagY - 32);
+        gCtx.stroke();
+        gCtx.fillStyle = "#22c55e";
+        gCtx.font = "bold 12px sans-serif";
+        gCtx.fillText("🏁 ĐÁY CỰC TIỂU (Trúng đích)", flagX - 75, flagY + 20);
+
+        // 4. Vẽ vết các bước mò đường cũ (Footsteps)
+        for (let i = 0; i < historyPoints.length - 1; i++) {
+            const pt1 = historyPoints[i];
+            const pt2 = historyPoints[i + 1];
+            const p1x = toPxX(pt1.x), p1y = toPxY(pt1.y);
+            const p2x = toPxX(pt2.x), p2y = toPxY(pt2.y);
+
+            gCtx.strokeStyle = "rgba(245, 158, 11, 0.5)";
+            gCtx.setLineDash([4, 4]);
+            gCtx.beginPath();
+            gCtx.moveTo(p1x, p1y);
+            gCtx.lineTo(p2x, p2y);
+            gCtx.stroke();
+            gCtx.setLineDash([]);
+
+            gCtx.fillStyle = "rgba(245, 158, 11, 0.6)";
+            gCtx.beginPath();
+            gCtx.arc(p1x, p1y, 5, 0, Math.PI * 2);
+            gCtx.fill();
+        }
+
+        // 5. Vẽ Đường Tiếp Tuyến (Đạo hàm) tại vị trí hiện tại
+        const curY = f(currentX);
+        const slope = df(currentX);
+        const ballPxX = toPxX(currentX);
+        const ballPxY = toPxY(curY);
+
+        const tanDeltaX = xRange * 0.22;
+        const x1 = currentX - tanDeltaX, y1 = curY - slope * tanDeltaX;
+        const x2 = currentX + tanDeltaX, y2 = curY + slope * tanDeltaX;
+
+        gCtx.strokeStyle = "#f59e0b";
+        gCtx.lineWidth = 2.5;
+        gCtx.beginPath();
+        gCtx.moveTo(toPxX(x1), toPxY(y1));
+        gCtx.lineTo(toPxX(x2), toPxY(y2));
+        gCtx.stroke();
+
+        // 6. Vẽ Mũi tên chỉ hướng "Đi ngược dấu đạo hàm"
+        if (Math.abs(slope) >= 0.05) {
+            const dir = slope < 0 ? 1 : -1; // Đạo hàm âm đi sang phải (+1), dương đi sang trái (-1)
+            const arrowLen = Math.min(75, Math.max(30, Math.abs(slope) * 18));
+            const arrowY = ballPxY - 26;
+
+            gCtx.strokeStyle = dir > 0 ? "#22c55e" : "#ef4444";
+            gCtx.fillStyle = dir > 0 ? "#22c55e" : "#ef4444";
+            gCtx.lineWidth = 3;
+
+            gCtx.beginPath();
+            gCtx.moveTo(ballPxX, arrowY);
+            gCtx.lineTo(ballPxX + dir * arrowLen, arrowY);
+            gCtx.stroke();
+
+            // Đầu mũi tên
+            gCtx.beginPath();
+            gCtx.moveTo(ballPxX + dir * (arrowLen + 6), arrowY);
+            gCtx.lineTo(ballPxX + dir * (arrowLen - 4), arrowY - 6);
+            gCtx.lineTo(ballPxX + dir * (arrowLen - 4), arrowY + 6);
+            gCtx.closePath();
+            gCtx.fill();
+
+            gCtx.font = "bold 12px sans-serif";
+            const label = slope < 0 ? "f'(x) Âm 👉 Tăng x" : "👈 Giảm x (vì f'(x) Dương)";
+            gCtx.fillText(label, ballPxX - 55, arrowY - 10);
+        }
+
+        // 7. Vẽ Viên Bi AI
+        gCtx.fillStyle = "#f8fafc";
+        gCtx.strokeStyle = "#0ea5e9";
+        gCtx.lineWidth = 4;
+        gCtx.beginPath();
+        gCtx.arc(ballPxX, ballPxY, 9, 0, Math.PI * 2);
+        gCtx.fill();
+        gCtx.stroke();
+    }
+
+    // ================= VẼ MÔ PHỎNG XE TĂNG BẮN MỤC TIÊU =================
+    function drawTankSim() {
+        const w = tankCanvas.width = tankCanvas.clientWidth;
+        const h = tankCanvas.height = tankCanvas.clientHeight;
+        tCtx.clearRect(0, 0, w, h);
+
+        const groundY = h - 32;
+
+        // Mặt đất
+        tCtx.fillStyle = "#1e293b";
+        tCtx.fillRect(0, groundY, w, 32);
+        tCtx.strokeStyle = "#475569";
+        tCtx.beginPath();
+        tCtx.moveTo(0, groundY);
+        tCtx.lineTo(w, groundY);
+        tCtx.stroke();
+
+        // Vị trí Xe tăng (cố định bên trái) & Mục tiêu (bên phải)
+        const tankX = 55;
+        const mapScale = (w - 140) / (xRange * 2);
+        const worldToTankPx = (valX) => (w * 0.55) + (valX - targetX) * mapScale;
+
+        const targetPxX = worldToTankPx(targetX);
+        const landPxX = Math.max(95, Math.min(w - 20, worldToTankPx(currentX)));
+
+        // 1. Vẽ Bia Mục Tiêu
+        tCtx.fillStyle = "#ef4444";
+        tCtx.beginPath();
+        tCtx.arc(targetPxX, groundY - 14, 14, 0, Math.PI * 2);
+        tCtx.fill();
+        tCtx.fillStyle = "#ffffff";
+        tCtx.beginPath();
+        tCtx.arc(targetPxX, groundY - 14, 8, 0, Math.PI * 2);
+        tCtx.fill();
+        tCtx.fillStyle = "#ef4444";
+        tCtx.beginPath();
+        tCtx.arc(targetPxX, groundY - 14, 4, 0, Math.PI * 2);
+        tCtx.fill();
+
+        tCtx.fillStyle = "#4ade80";
+        tCtx.font = "bold 12px sans-serif";
+        tCtx.fillText("🎯 MỤC TIÊU", targetPxX - 36, groundY + 20);
+
+        // 2. Vẽ Xe Tăng AI
+        tCtx.fillStyle = "#38bdf8";
+        tCtx.fillRect(tankX - 22, groundY - 16, 44, 16);
+        tCtx.beginPath();
+        tCtx.arc(tankX, groundY - 16, 12, Math.PI, 0);
+        tCtx.fill();
+        // Nòng pháo
+        tCtx.strokeStyle = "#7dd3fc";
+        tCtx.lineWidth = 5;
+        tCtx.beginPath();
+        tCtx.moveTo(tankX + 6, groundY - 22);
+        tCtx.lineTo(tankX + 28, groundY - 34);
+        tCtx.stroke();
+
+        tCtx.fillStyle = "#94a3b8";
+        tCtx.font = "bold 11px sans-serif";
+        tCtx.fillText(`Lực x = ${currentX.toFixed(2)}`, tankX - 30, groundY + 20);
+
+        // 3. Vẽ Quỹ đạo đạn dự kiến (nét đứt mờ)
+        const midX = (tankX + 25 + landPxX) / 2;
+        const arcHeight = Math.min(130, Math.max(50, Math.abs(landPxX - tankX) * 0.35));
+
+        tCtx.strokeStyle = "rgba(148, 163, 184, 0.3)";
+        tCtx.setLineDash([4, 4]);
+        tCtx.lineWidth = 1.5;
+        tCtx.beginPath();
+        tCtx.moveTo(tankX + 28, groundY - 34);
+        tCtx.quadraticCurveTo(midX, groundY - 34 - arcHeight, landPxX, groundY - 4);
+        tCtx.stroke();
+        tCtx.setLineDash([]);
+
+        // 4. Vẽ Đạn bay & Nổ theo giai đoạn
+        if (animPhase === "FLYING") {
+            const t = projectile.progress;
+            const startX = tankX + 28, startY = groundY - 34;
+            const ctrlX = midX, ctrlY = groundY - 34 - arcHeight;
+            const endX = landPxX, endY = groundY - 4;
+
+            // Công thức Bezier bậc 2
+            const bx = (1 - t) * (1 - t) * startX + 2 * (1 - t) * t * ctrlX + t * t * endX;
+            const by = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * ctrlY + t * t * endY;
+
+            tCtx.fillStyle = "#fbbf24";
+            tCtx.beginPath();
+            tCtx.arc(bx, by, 6, 0, Math.PI * 2);
+            tCtx.fill();
+        } else if (animPhase === "EXPLODED" || animPhase === "MOVING" || shotCount > 0) {
+            // Vẽ vụ nổ tại điểm rơi
+            const isHit = Math.abs(currentX - targetX) < 0.15;
+            tCtx.fillStyle = isHit ? "rgba(34, 197, 94, 0.35)" : "rgba(239, 68, 68, 0.35)";
+            tCtx.beginPath();
+            tCtx.arc(landPxX, groundY - 6, 18, 0, Math.PI * 2);
+            tCtx.fill();
+
+            // Vẽ thước đo độ lệch giữa Điểm đạn nổ và Mục tiêu
+            if (!isHit) {
+                tCtx.strokeStyle = "#f59e0b";
+                tCtx.lineWidth = 2;
+                tCtx.beginPath();
+                tCtx.moveTo(landPxX, groundY - 42);
+                tCtx.lineTo(targetPxX, groundY - 42);
+                tCtx.stroke();
+
+                const diff = currentX - targetX;
+                tCtx.fillStyle = "#fbbf24";
+                tCtx.font = "bold 12px sans-serif";
+                const errText = diff < 0 ? `Bắn hụt ${Math.abs(diff).toFixed(2)}m (Tăng lực 👉)` : `Bắn lố +${diff.toFixed(2)}m (👈 Giảm lực)`;
+                tCtx.fillText(errText, (landPxX + targetPxX) / 2 - 65, groundY - 50);
+            } else {
+                tCtx.fillStyle = "#4ade80";
+                tCtx.font = "bold 14px sans-serif";
+                tCtx.fillText("💥 BẮN TRÚNG ĐÍCH! (Sai số ≈ 0)", targetPxX - 95, groundY - 48);
             }
-          }
-          if (canPlay) break;
         }
-        if (canPlay) break;
-      }
-
-      if (!canPlay) {
-        finalScoreEl.innerText = score;
-        gameOverScreen.classList.remove('hidden');
-      }
     }
 
-    function updateScore(add) {
-      score += add;
-      scoreEl.innerText = score;
-      // Simple animation
-      scoreEl.style.transform = 'scale(1.3)';
-      setTimeout(() => { scoreEl.style.transform = 'scale(1)'; }, 150);
+    // ================= VÒNG LẶP HOẠT ẢNH CHÍNH =================
+    function mainLoop() {
+        // Cập nhật trạng thái hoạt ảnh
+        if (animPhase === "FLYING") {
+            projectile.progress += 0.04;
+            if (projectile.progress >= 1) {
+                animPhase = "EXPLODED";
+                explosionTimer = 0;
+                const slope = df(currentX);
+                const nextX = currentX - learningRate * slope;
+                appendHistoryLog(shotCount, currentX, slope, nextX);
+                updateThoughtBubble();
+            }
+        } else if (animPhase === "EXPLODED") {
+            explosionTimer++;
+            if (explosionTimer > 38) { // Dừng 0.6 giây để cả lớp nhìn rõ lỗi sai
+                const slope = df(currentX);
+                if (Math.abs(slope) < 0.03) {
+                    animPhase = "IDLE";
+                    stopAutoPlay();
+                    updateThoughtBubble();
+                } else {
+                    animPhase = "MOVING";
+                    moveAnim.progress = 0;
+                    moveAnim.fromX = currentX;
+                    moveAnim.toX = Math.max(-xRange * 1.5, Math.min(xRange * 1.5, currentX - learningRate * slope));
+                }
+            }
+        } else if (animPhase === "MOVING") {
+            moveAnim.progress += 0.06;
+            if (moveAnim.progress >= 1) {
+                currentX = moveAnim.toX;
+                historyPoints.push({ x: currentX, y: f(currentX) });
+                animPhase = "IDLE";
+                updateThoughtBubble();
+
+                // Nếu đang bật Tự Học Liên Tục thì tự động bắn phát tiếp theo
+                if (isAutoPlaying) {
+                    setTimeout(() => {
+                        if (isAutoPlaying && animPhase === "IDLE") startShotCycle();
+                    }, 350);
+                }
+            } else {
+                currentX = moveAnim.fromX + (moveAnim.toX - moveAnim.fromX) * moveAnim.progress;
+            }
+        }
+
+        drawGraph();
+        drawTankSim();
+        requestAnimationFrame(mainLoop);
     }
 
-    // Start
-    initGame();
-
-  </script>
+    // Khởi chạy ban đầu
+    applyEquationInternal("(x - 2)^2", -2.5);
+    requestAnimationFrame(mainLoop);
+</script>
 </body>
 </html>
