@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mô phỏng AI Tự Học Bằng Đạo Hàm - Toán 12</title>
+    <title>GeoGebra AI Studio - Ứng Dụng Đạo Hàm Toán 12</title>
+    <!-- Favicon Hình Tam Giác chuẩn trên Tab Trình Duyệt -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,8 94,88 6,88' fill='%2338bdf8' stroke='%23ffffff' stroke-width='6' stroke-linejoin='round'/%3E%3Cpolygon points='50,32 75,78 25,78' fill='%230f172a'/%3E%3C/svg%3E">
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --panel-bg: #1e293b;
-            --border-color: #334155;
+            --bg-dark: #0b1120;
+            --panel-bg: #151f32;
+            --border-color: #2e3f5c;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --accent-blue: #38bdf8;
@@ -28,465 +30,569 @@
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
-            padding: 16px;
-            min-height: 100vh;
+            padding: 12px 16px;
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
         }
 
-        /* Header */
+        /* Header gọn gàng */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: var(--panel-bg);
-            padding: 14px 20px;
-            border-radius: 12px;
+            padding: 10px 18px;
+            border-radius: 10px;
             border: 1px solid var(--border-color);
-            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .brand-title {
+            display: flex;
+            align-items: center;
             gap: 12px;
         }
 
-        .title-group h1 {
-            font-size: 1.35rem;
+        .triangle-logo {
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
+        }
+
+        .brand-title h1 {
+            font-size: 1.25rem;
             color: var(--accent-blue);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-weight: 700;
         }
 
-        .title-group p {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
-
-        /* Equation Bar */
-        .eq-bar {
+        .preset-group {
             display: flex;
             align-items: center;
             gap: 8px;
             flex-wrap: wrap;
-        }
-
-        .eq-input-group {
-            display: flex;
-            align-items: center;
-            background: #090d16;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 4px 10px;
-        }
-
-        .eq-input-group span {
-            color: var(--accent-amber);
-            font-weight: bold;
-            margin-right: 6px;
-            font-family: monospace;
-            font-size: 1rem;
-        }
-
-        .eq-input-group input {
-            background: transparent;
-            border: none;
-            color: var(--text-main);
-            font-family: monospace;
-            font-size: 1rem;
-            width: 210px;
-            outline: none;
         }
 
         button {
             cursor: pointer;
             border: none;
-            border-radius: 8px;
-            padding: 8px 14px;
+            border-radius: 7px;
+            padding: 7px 12px;
             font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.2s;
+            font-size: 0.85rem;
+            transition: all 0.15s;
             display: inline-flex;
             align-items: center;
             gap: 6px;
         }
 
+        .btn-outline {
+            background: #1e293b;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+        .btn-outline:hover, .btn-outline.active {
+            background: #2563eb;
+            border-color: #60a5fa;
+            color: #fff;
+        }
+
         .btn-primary {
             background: var(--accent-blue);
-            color: #0f172a;
+            color: #090d16;
+            font-weight: 700;
         }
         .btn-primary:hover { background: #7dd3fc; }
 
         .btn-success {
             background: var(--accent-green);
             color: #052e16;
-            font-size: 1rem;
-            padding: 10px 18px;
+            font-size: 0.92rem;
+            padding: 9px 16px;
         }
         .btn-success:hover { background: #4ade80; }
 
         .btn-warning {
             background: var(--accent-amber);
             color: #451a03;
+            font-size: 0.92rem;
+            padding: 9px 15px;
         }
         .btn-warning:hover { background: #fbbf24; }
 
-        .btn-outline {
-            background: transparent;
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-        }
-        .btn-outline:hover, .btn-outline.active {
-            background: #334155;
-            border-color: var(--accent-blue);
-        }
-
-        /* Main Layout */
-        .main-grid {
+        /* Bố cục 2 cột full chiều cao */
+        .main-workspace {
             display: grid;
-            grid-template-columns: 1.35fr 1fr;
-            gap: 16px;
+            grid-template-columns: 1.55fr 1fr;
+            gap: 14px;
             flex: 1;
+            min-height: 0;
         }
 
-        @media (max-width: 1024px) {
-            .main-grid { grid-template-columns: 1fr; }
-        }
-
-        .panel {
+        .col-panel {
             background: var(--panel-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 16px;
+            padding: 12px 14px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
+            min-height: 0;
+            height: 100%;
         }
 
-        .panel-header {
+        /* GeoGebra Algebra & Toolbar Area */
+        .geogebra-top-bar {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-        }
-
-        .panel-title {
-            font-size: 1.05rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 8px;
-        }
-
-        /* Canvas Containers */
-        .canvas-wrap {
-            position: relative;
-            background: #090d16;
-            border-radius: 10px;
-            border: 1px solid #1e293b;
-            overflow: hidden;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-        }
-
-        #graphCanvas {
-            height: 360px;
-            cursor: pointer;
-        }
-
-        #tankCanvas {
-            height: 210px;
-        }
-
-        .canvas-overlay-controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            gap: 6px;
-        }
-
-        .mini-btn {
-            background: rgba(30, 41, 59, 0.85);
-            color: var(--text-main);
+            background: #0b1120;
             border: 1px solid var(--border-color);
-            padding: 5px 10px;
-            font-size: 0.8rem;
-            border-radius: 6px;
-        }
-        .mini-btn.active {
-            background: var(--accent-purple);
-            color: white;
-            border-color: var(--accent-purple);
+            border-radius: 10px;
+            padding: 10px 12px;
         }
 
-        /* AI Thought Bubble (Presenter Helper) */
-        .ai-thought-box {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
-            border-left: 5px solid var(--accent-blue);
-            border-radius: 8px;
-            padding: 14px 16px;
+        .ggb-input-row {
             display: flex;
-            flex-direction: column;
-            gap: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-        }
-
-        .thought-header {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--accent-blue);
-            font-weight: 700;
-        }
-
-        .thought-content {
-            font-size: 1.05rem;
-            line-height: 1.5;
-            color: #ffffff;
-        }
-
-        .thought-rule {
-            margin-top: 4px;
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 6px;
-            font-size: 0.95rem;
-            color: #cbd5e1;
-        }
-
-        /* Controls Bar */
-        .controls-card {
-            background: #0f172a;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 12px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .action-buttons {
-            display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
 
-        .slider-row {
+        .color-dot-picker {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            cursor: pointer;
+            padding: 0;
+            background: transparent;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .color-dot-picker::-webkit-color-swatch-wrapper { padding: 0; }
+        .color-dot-picker::-webkit-color-swatch { border: none; border-radius: 50%; }
+
+        .ggb-fx-label {
+            font-family: 'Times New Roman', Georgia, serif;
+            font-style: italic;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-blue);
+        }
+
+        .ggb-input-box {
+            flex: 1;
+            background: #151f32;
+            border: 1px solid #3b82f6;
+            color: #fff;
+            padding: 7px 12px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: 'Consolas', monospace;
+            outline: none;
+        }
+
+        /* Khung hiển thị Công thức Toán học 2D chuẩn SGK (Phân số, Số mũ, Dấu chấm nhân) */
+        .pretty-math-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(30, 41, 59, 0.65);
+            border-left: 4px solid var(--accent-blue);
+            padding: 6px 12px;
+            border-radius: 6px;
+            min-height: 44px;
+        }
+
+        .math-render-view {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.25rem;
+            color: #f8fafc;
             display: flex;
             align-items: center;
+            gap: 6px;
+            overflow-x: auto;
+        }
+
+        /* CSS cho Phân số 2 tầng */
+        .frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 4px;
+            font-size: 0.95em;
+        }
+        .frac-num {
+            border-bottom: 1.5px solid #e2e8f0;
+            padding: 0 5px 2px 5px;
+            text-align: center;
+        }
+        .frac-den {
+            padding: 2px 5px 0 5px;
+            text-align: center;
+        }
+
+        /* Bàn phím ảo Toán học GeoGebra */
+        .math-keypad {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .key-btn {
+            background: #1e293b;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+            padding: 4px 9px;
+            font-family: 'Times New Roman', serif;
+            font-size: 0.95rem;
+            border-radius: 5px;
+        }
+        .key-btn:hover { background: #334155; border-color: var(--accent-blue); }
+
+        /* Thanh công cụ GeoGebra (Modes & Settings) */
+        .ggb-toolbar {
+            display: flex;
             justify-content: space-between;
-            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding-top: 4px;
+            border-top: 1px solid #1e293b;
+        }
+
+        .tool-modes, .view-toggles {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             flex-wrap: wrap;
         }
 
-        .slider-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-            min-width: 220px;
+        .tool-btn {
+            background: #151f32;
+            color: #cbd5e1;
+            border: 1px solid #334155;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+        .tool-btn.active {
+            background: rgba(56, 189, 248, 0.2);
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+            font-weight: 700;
         }
 
-        .slider-group label {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            white-space: nowrap;
+        .asymptote-badge {
+            font-size: 0.8rem;
+            color: #f472b6;
+            background: rgba(244, 114, 182, 0.12);
+            border: 1px solid rgba(244, 114, 182, 0.35);
+            padding: 3px 9px;
+            border-radius: 6px;
+            font-family: monospace;
         }
 
-        .slider-group input[type="range"] {
+        /* Khung Vẽ Đồ Thị GeoGebra */
+        .graph-wrapper {
+            position: relative;
             flex: 1;
-            accent-color: var(--accent-blue);
+            background: #070b14;
+            border-radius: 10px;
+            border: 1px solid #2e3f5c;
+            overflow: hidden;
+            min-height: 220px;
         }
 
-        /* History Log Table */
-        .history-container {
-            flex: 1;
-            overflow-y: auto;
-            max-height: 220px;
+        #graphCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Danh sách Điểm tạo trên đồ thị */
+        .points-floating-box {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(15, 23, 42, 0.88);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            background: #090d16;
+            padding: 8px 10px;
+            max-width: 230px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+            backdrop-filter: blur(4px);
+        }
+
+        .point-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            padding: 2px 0;
+            color: #fde047;
+            font-family: monospace;
+        }
+
+        /* Hộp Trạng thái AI (Đã bỏ Mẹo thuyết trình) */
+        .ai-status-bar {
+            background: #0b1120;
+            border-left: 4px solid var(--accent-blue);
+            border-radius: 8px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .status-top {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+        }
+
+        .status-desc {
+            font-size: 0.95rem;
+            color: #f1f5f9;
+            line-height: 1.4;
+        }
+
+        /* Điều khiển dưới cùng cột trái */
+        .bottom-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            background: #0b1120;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        /* Cột Phải: Xe Tăng + Lịch Sử kéo dài chạm đáy */
+        .tank-box {
+            background: #070b14;
+            border: 1px solid #2e3f5c;
+            border-radius: 10px;
+            height: 185px;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #tankCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .history-wrapper {
+            flex: 1; /* Kéo giãn 100% phần diện tích còn lại của cột phải */
+            min-height: 0;
+            background: #070b14;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             text-align: left;
         }
 
         th {
             background: #1e293b;
             color: var(--text-muted);
-            padding: 8px 10px;
+            padding: 9px 10px;
             position: sticky;
             top: 0;
+            z-index: 2;
             font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
         }
 
         td {
             padding: 8px 10px;
-            border-bottom: 1px solid #1e293b;
+            border-bottom: 1px solid #151f32;
         }
 
         tr:first-child td {
-            background: rgba(56, 189, 248, 0.12);
+            background: rgba(56, 189, 248, 0.14);
             font-weight: 600;
         }
 
         .badge {
-            padding: 3px 8px;
+            padding: 2px 7px;
             border-radius: 99px;
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             font-weight: 700;
             display: inline-block;
         }
         .badge-neg { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
         .badge-pos { background: rgba(239, 68, 68, 0.2); color: #f87171; }
         .badge-zero { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
-
-        .Math-toggle {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="title-group">
-            <h1>🎯 Đạo Hàm Trong Đời Sống: Cách AI Tự Sửa Sai Khi Tập Bắn</h1>
-            <p>Không cần công thức phức tạp — Hiểu ngay cách AI "mò đường" bằng bảng biến thiên và dấu của Đạo hàm!</p>
+        <div class="brand-title">
+            <!-- Icon Tam Giác Vector đồng bộ với Favicon -->
+            <svg class="triangle-logo" viewBox="0 0 100 100">
+                <polygon points="50,8 94,88 6,88" fill="#38bdf8" stroke="#ffffff" stroke-width="6" stroke-linejoin="round"/>
+                <polygon points="50,32 75,78 25,78" fill="#0f172a"/>
+            </svg>
+            <div>
+                <h1>GeoGebra AI Studio: Ứng Dụng Đạo Hàm Tìm Cực Trị & Sửa Sai</h1>
+            </div>
         </div>
 
-        <div class="eq-bar">
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Hàm mẫu:</span>
-            <button class="btn-outline active" onclick="setPreset('(x - 2)^2', -2.5)">Hàm Bậc 2 (Dễ hiểu)</button>
-            <button class="btn-outline" onclick="setPreset('0.15*x^4 - 0.2*x^3 - x^2 + 3', 0.4)">Hàm Bậc 4 (Bẫy Hố Nông)</button>
-            <button class="btn-outline" onclick="setPreset('0.3*x^2 - 1.5*cos(2*x) + 2', -3.2)">Hàm Lượng Giác</button>
-
-            <div class="eq-input-group">
-                <span>y = f(x) =</span>
-                <input type="text" id="eqInput" value="(x - 2)^2" placeholder="Nhập hàm bất kỳ theo x...">
-            </div>
-            <button class="btn-primary" onclick="applyCustomEquation()">Áp dụng hàm</button>
+        <div class="preset-group">
+            <span style="font-size: 0.82rem; color: var(--text-muted);">Hàm mẫu SGK:</span>
+            <button class="btn-outline active" onclick="loadPreset('(x - 2)^2', -2.5)">Bậc 2: (x-2)²</button>
+            <button class="btn-outline" onclick="loadPreset('(x - 2)^2 / (x - 1)', 3.8)">Hàm Phân Thức (Có TCĐ & TCX)</button>
+            <button class="btn-outline" onclick="loadPreset('(2*x - 1) / (x + 1)', 2.0)">Hàm Nhất Biến (TCĐ & TCN)</button>
+            <button class="btn-outline" onclick="loadPreset('0.15*x^4 - 0.2*x^3 - x^2 + 3', 0.4)">Hàm Bậc 4 (2 Cực tiểu)</button>
         </div>
     </header>
 
-    <div class="main-grid">
-        <!-- CỘT TRÁI: ĐỒ THỊ ĐẠO HÀM & BẢNG ĐIỀU KHIỂN -->
-        <div class="panel">
-            <div class="panel-header">
-                <div class="panel-title">
-                    📈 1. Bản Đồ Độ Lệch y = f(x) & Độ Dốc Tiếp Tuyến f'(x)
+    <div class="main-workspace">
+        <!-- ================= CỘT TRÁI: GEOGEBRA ĐỒ THỊ & ĐIỀU KHIỂN ================= -->
+        <div class="col-panel">
+            <div class="geogebra-top-bar">
+                <!-- Dòng 1: Ô nhập hàm kiểu GeoGebra + Đổi màu đồ thị -->
+                <div class="ggb-input-row">
+                    <input type="color" id="curveColorPicker" class="color-dot-picker" value="#38bdf8" title="Đổi màu đồ thị" onchange="updateCurveColor(this.value)">
+                    <span class="ggb-fx-label">f(x) =</span>
+                    <input type="text" id="eqInput" class="ggb-input-box" value="(x - 2)^2" oninput="renderPrettyMath()" onkeydown="if(event.key==='Enter') applyEquation()">
+                    <button class="btn-primary" onclick="applyEquation()">Vẽ Đồ Thị</button>
+
+                    <!-- Bàn phím nhanh ký hiệu Toán -->
+                    <div class="math-keypad">
+                        <button class="key-btn" onclick="insertSymbol('/')" title="Phân số a/b">a/b</button>
+                        <button class="key-btn" onclick="insertSymbol('^2')" title="Bình phương">x²</button>
+                        <button class="key-btn" onclick="insertSymbol('^')" title="Số mũ">xⁿ</button>
+                        <button class="key-btn" onclick="insertSymbol('sqrt(')" title="Căn bậc hai">√x</button>
+                        <button class="key-btn" onclick="insertSymbol('*')" title="Phép nhân">·</button>
+                        <button class="key-btn" onclick="insertSymbol('sin(')">sin</button>
+                        <button class="key-btn" onclick="insertSymbol('cos(')">cos</button>
+                    </div>
                 </div>
-                <label class="Math-toggle">
-                    <input type="checkbox" id="showMathFormula" onchange="updateThoughtBubble()">
-                    Hiện công thức Toán nâng cao
-                </label>
+
+                <!-- Dòng 2: Hiển thị công thức Toán 2D chuẩn SGK (Phân số 2 tầng, dấu chấm nhân) + Thông báo Tiệm cận -->
+                <div class="pretty-math-bar">
+                    <div class="math-render-view" id="prettyMathDisplay">
+                        <!-- Render tự động bằng JS -->
+                    </div>
+                    <div id="asymptoteInfo" class="asymptote-badge">
+                        Tiệm cận: Không có
+                    </div>
+                </div>
+
+                <!-- Dòng 3: Thanh công cụ GeoGebra (Chế độ chuột, Trục Ox/Oy, Tiệm cận, Tạo điểm) -->
+                <div class="ggb-toolbar">
+                    <div class="tool-modes">
+                        <span style="font-size:0.78rem; color:var(--text-muted);">Công cụ chuột:</span>
+                        <button class="tool-btn active" id="modePan" onclick="setMouseMode('PAN')">✋ Kéo đồ thị (Pan)</button>
+                        <button class="tool-btn" id="modePlaceAI" onclick="setMouseMode('AI')">🤖 Đặt vị trí AI</button>
+                        <button class="tool-btn" id="modePoint" onclick="setMouseMode('POINT')">📍 Tạo Điểm (A, B, C)</button>
+                        <button class="tool-btn" onclick="clearCustomPoints()" title="Xóa các điểm A, B, C đã chấm">🗑️ Xóa điểm</button>
+                    </div>
+
+                    <div class="view-toggles">
+                        <button class="tool-btn active" id="btnAxes" onclick="toggleView('AXES')">Trục Ox, Oy</button>
+                        <button class="tool-btn active" id="btnGrid" onclick="toggleView('GRID')">Lưới ô vuông</button>
+                        <button class="tool-btn active" id="btnAsymp" onclick="toggleView('ASYMP')">Đường Tiệm Cận</button>
+                        <button class="tool-btn" id="btnFog" onclick="toggleView('FOG')">👁️ Bịt mắt AI</button>
+                        <button class="tool-btn" onclick="resetCamera()" title="Đưa tâm đồ thị về lại gốc O(0,0)">🏠 Về gốc O</button>
+                    </div>
+                </div>
             </div>
 
-            <div class="canvas-wrap">
+            <!-- Vùng Canvas Vẽ Đồ Thị (Hỗ trợ cuộn chuột Zoom & Kéo thả) -->
+            <div class="graph-wrapper">
                 <canvas id="graphCanvas"></canvas>
-                <div class="canvas-overlay-controls">
-                    <button class="mini-btn" id="fogBtn" onclick="toggleFogMode()" title="Che đồ thị để thấy góc nhìn thực tế của AI">
-                        👁️ Góc nhìn của AI (Bịt mắt): TẮT
-                    </button>
-                    <button class="mini-btn" onclick="zoomGraph(0.8)">➕ Phóng to</button>
-                    <button class="mini-btn" onclick="zoomGraph(1.25)">➖ Thu nhỏ</button>
+
+                <!-- Hộp hiển thị tọa độ các Điểm A, B, C được chấm trên đồ thị -->
+                <div class="points-floating-box" id="pointsBox" style="display:none;">
+                    <div style="font-weight:700; color:#94a3b8; margin-bottom:4px; border-bottom:1px solid #334155;">Danh sách Điểm thuộc đồ thị:</div>
+                    <div id="pointsList"></div>
                 </div>
             </div>
 
-            <!-- Hộp thoại suy nghĩ của AI (Cứu cánh cho người thuyết trình) -->
-            <div class="ai-thought-box" id="thoughtBox">
-                <div class="thought-header">
-                    <span id="stepStatusBadge">🤖 TRẠNG THÁI AI: ĐANG CHỜ LỆNH BẮN THỬ</span>
-                    <span id="shotCountText">Phát bắn thứ: 0</span>
+            <!-- Thanh Trạng Thái AI (Ngắn gọn, không có Mẹo thuyết trình) -->
+            <div class="ai-status-bar">
+                <div class="status-top">
+                    <span id="stepStatusBadge">🤖 TRẠNG THÁI AI: ĐANG CHỜ LỆNH</span>
+                    <span id="shotCountText">Lần thử thứ: 0</span>
                 </div>
-                <div class="thought-content" id="aiNarrative">
-                    Hãy bấm nút <b>"Bắn Thử & Tự Sửa (1 Bước)"</b> hoặc click lên đồ thị để chọn đại một Lực bắn ban đầu cho AI!
-                </div>
-                <div class="thought-rule" id="aiRuleExplain">
-                    💡 <b>Quy tắc cốt lõi:</b> Đạo hàm <b>f'(x) Âm</b> (dốc chúc xuống) 👉 Tăng lực (sang phải) | Đạo hàm <b>f'(x) Dương</b> (dốc hướng lên) 👉 Giảm lực (sang trái).
+                <div class="status-desc" id="aiNarrative">
+                    Cuộn con lăn chuột trên đồ thị để Phóng to / Thu nhỏ. Bấm <b>"Bắn Thử (1 Bước)"</b> hoặc <b>"AI Tự Học"</b> để xem đạo hàm dẫn đường về cực tiểu!
                 </div>
             </div>
 
-            <!-- Thanh điều khiển -->
-            <div class="controls-card">
-                <div class="action-buttons">
-                    <button class="btn-success" id="autoBtn" onclick="toggleAutoPlay()">
-                        ▶️ AI Tự Học Liên Tục (Thử & Sai)
-                    </button>
-                    <button class="btn-warning" onclick="triggerSingleShot()">
-                        🔫 Bắn Thử & Tự Sửa (1 Bước)
-                    </button>
-                    <button class="btn-outline" onclick="resetRandom()">
-                        🎲 Đặt Lại Vị Trí Ngẫu Nhiên
-                    </button>
+            <!-- Thanh nút bấm điều khiển AI -->
+            <div class="bottom-controls">
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <button class="btn-success" id="autoBtn" onclick="toggleAutoPlay()">▶️ AI Tự Học Liên Tục</button>
+                    <button class="btn-warning" onclick="triggerSingleShot()">🔫 Bắn Thử & Sửa Sai (1 Bước)</button>
+                    <button class="btn-outline" onclick="resetRandom()">🎲 Vị Trí Ngẫu Nhiên</button>
                 </div>
 
-                <div class="slider-row">
-                    <div class="slider-group">
-                        <label>Mức độ chỉnh lực mỗi lần ($\alpha$): <b id="lrVal" style="color:var(--accent-blue)">Vừa phải (0.20)</b></label>
-                        <input type="range" id="lrSlider" min="0.02" max="1.05" step="0.02" value="0.20" oninput="updateLR(this.value)">
-                    </div>
-                    <div style="display:flex; gap:6px;">
-                        <button class="mini-btn" onclick="setLRPreset(0.05)">Nhích từng tí (0.05)</button>
-                        <button class="mini-btn" onclick="setLRPreset(0.20)">Chuẩn (0.20)</button>
-                        <button class="mini-btn" onclick="setLRPreset(1.02)">Chỉnh lố đà (1.02)</button>
-                    </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:0.82rem; color:var(--text-muted);">Hệ số bước nhảy (α): <b id="lrVal" style="color:var(--accent-blue)">0.15</b></span>
+                    <input type="range" id="lrSlider" min="0.02" max="0.90" step="0.01" value="0.15" style="width:100px; accent-color:var(--accent-blue);" oninput="updateLR(this.value)">
                 </div>
             </div>
         </div>
 
-        <!-- CỘT PHẢI: XE TĂNG BẮN THử & NHẬT KÝ SỬA SAI -->
-        <div class="panel">
-            <div class="panel-header">
-                <div class="panel-title">
-                    💥 2. Mô Phỏng Thực Tế: Xe Tăng AI Tập Bắn Mục Tiêu
-                </div>
-                <span style="font-size: 0.85rem; color: var(--accent-green); font-weight:600;" id="targetInfoText">
-                    Mục tiêu cần lực chuẩn: x* = 2.00
-                </span>
+        <!-- ================= CỘT PHẢI: MÔ PHỎNG XE TĂNG & BẢNG LỊCH SỬ FULL CHIỀU DÀI ================= -->
+        <div class="col-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:700; font-size:0.98rem;">💥 Mô Phỏng Xe Tăng AI Ngắm Bắn Cực Tiểu</span>
+                <span style="font-size:0.85rem; color:var(--accent-green); font-weight:700;" id="targetInfoText">Đích cực tiểu: x* = 2.00</span>
             </div>
 
-            <div class="canvas-wrap">
+            <div class="tank-box">
                 <canvas id="tankCanvas"></canvas>
             </div>
 
-            <div class="panel-header" style="margin-top: 4px;">
-                <div class="panel-title">
-                    📋 3. Nhật Ký Quá Trình "Mò Đường" Của AI (Đọc theo bảng này)
-                </div>
-                <span style="font-size: 0.8rem; color: var(--text-muted);">Mới nhất ở trên cùng</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+                <span style="font-weight:700; font-size:0.98rem;">📋 Nhật Ký Quá Trình "Mò Đường" Bằng Đạo Hàm</span>
+                <span style="font-size:0.78rem; color:var(--text-muted);">Tự động cuộn theo phát bắn mới nhất</span>
             </div>
 
-            <div class="history-container">
+            <!-- Bảng lịch sử bắn tự động kéo dài chạm sát đáy cột phải -->
+            <div class="history-wrapper">
                 <table>
                     <thead>
                         <tr>
                             <th>Lần</th>
-                            <th>Lực bắn (x)</th>
-                            <th>Kết quả bắn</th>
-                            <th>Độ dốc / Đạo hàm f'(x)</th>
+                            <th>Vị trí (x)</th>
+                            <th>Sai số</th>
+                            <th>Đạo hàm f'(x)</th>
                             <th>Quyết định của AI</th>
                         </tr>
                     </thead>
                     <tbody id="historyBody">
                         <tr>
-                            <td colspan="5" style="text-align:center; color: var(--text-muted); padding: 20px;">
-                                Chưa có phát bắn nào. Hãy bấm nút "AI Tự Học" hoặc "Bắn Thử" để xem AI tự sửa sai!
+                            <td colspan="5" style="text-align:center; color: var(--text-muted); padding: 30px 10px;">
+                                Chưa có dữ liệu bắn thử. Hãy bấm nút "AI Tự Học" hoặc chấm điểm lên đồ thị!
                             </td>
                         </tr>
                     </tbody>
@@ -496,22 +602,42 @@
     </div>
 
 <script>
-    // ================= CẤU HÌNH TOÁN HỌC & TRẠNG THÁI =================
+    // ================= BIẾN TOÀN CỤC & CẤU HÌNH GEOGEBRA =================
     let rawExpr = "(x - 2)^2";
-    let compiledExpr = "";
+    let compiledFn = null;
+    let curveColor = "#38bdf8";
+
+    // Hệ tọa độ Camera (Hỗ trợ Pan & Zoom tại con trỏ chuột chuẩn GeoGebra)
+    let cam = {
+        centerX: 1.0,
+        centerY: 2.0,
+        scale: 55 // Số pixel trên 1 đơn vị toán học (1 unit = 55px)
+    };
+
+    // Các chế độ hiển thị
+    let showAxes = true;
+    let showGrid = true;
+    let showAsymptotes = true;
+    let fogMode = false;
+    let mouseMode = "PAN"; // "PAN", "AI", "POINT"
+
+    // Dữ liệu Tiệm cận & Điểm tự tạo
+    let verticalAsymptotes = [];
+    let obliqueAsymptote = null; // { m, b, type: 'TCN' | 'TCX' }
+    let userPoints = []; // [{ label: 'A', x: 1.5, y: 0.25 }]
+
+    // Dữ liệu AI Gradient Descent
     let currentX = -2.5;
     let targetX = 2.0;
     let targetY = 0.0;
-    let learningRate = 0.20;
+    let learningRate = 0.15;
     let shotCount = 0;
-    let historyPoints = []; // Lưu vết các điểm trên đồ thị
-    let fogMode = false;
-    let xRange = 6.0; // Phạm vi trục X (-6 đến +6)
+    let historyPoints = [];
 
-    // Trạng thái hoạt ảnh Bắn -> Nổ -> Suy nghĩ -> Bước
+    // Trạng thái hoạt ảnh
     let isAutoPlaying = false;
-    let animPhase = "IDLE"; // IDLE, FLYING, EXPLODED, MOVING
-    let projectile = { progress: 0, startX: 0, endX: 0 };
+    let animPhase = "IDLE";
+    let projectile = { progress: 0 };
     let explosionTimer = 0;
     let moveAnim = { progress: 0, fromX: 0, toX: 0 };
 
@@ -520,98 +646,606 @@
     const tankCanvas = document.getElementById('tankCanvas');
     const tCtx = tankCanvas.getContext('2d');
 
-    // ================= BỘ BIÊN DỊCH HÀM SỐ BẤT KỲ =================
+    // ================= 1. BỘ HIỂN THỊ CÔNG THỨC TOÁN 2D (PRETTY MATH) =================
+    function formatMathToken(str) {
+        let s = str.trim();
+        // Đổi dấu * thành dấu chấm nhân ·
+        s = s.replace(/\*/g, ' · ');
+        // Đổi sqrt(...) thành √(...)
+        s = s.replace(/sqrt\(([^)]+)\)/gi, '√($1)');
+        // Đổi số mũ ^n thành thẻ <sup>
+        s = s.replace(/\^(\d+|\([0-9+\-*/x]+\)|x)/g, '<sup>$1</sup>');
+        // Thêm khoảng trắng quanh dấu + và -
+        s = s.replace(/([0-9x)])([+\-])([0-9x(])/g, '$1 $2 $3');
+        return s;
+    }
+
+    function renderPrettyMath() {
+        const inputStr = document.getElementById('eqInput').value.trim();
+        const display = document.getElementById('prettyMathDisplay');
+
+        // Kiểm tra xem có phải hàm phân thức cấp cao nhất (a / b) không
+        let topSlashIndex = -1;
+        let depth = 0;
+        for (let i = 0; i < inputStr.length; i++) {
+            if (inputStr[i] === '(') depth++;
+            else if (inputStr[i] === ')') depth--;
+            else if (inputStr[i] === '/' && depth === 0) {
+                topSlashIndex = i;
+                break;
+            }
+        }
+
+        if (topSlashIndex !== -1) {
+            let num = inputStr.substring(0, topSlashIndex).trim();
+            let den = inputStr.substring(topSlashIndex + 1).trim();
+            // Bỏ ngoặc ngoài thừa nếu có: (x+1)/(x-1) -> x+1 trên x-1
+            if (num.startsWith('(') && num.endsWith(')') && isBalanced(num.slice(1, -1))) num = num.slice(1, -1);
+            if (den.startsWith('(') && den.endsWith(')') && isBalanced(den.slice(1, -1))) den = den.slice(1, -1);
+
+            display.innerHTML = `
+                <i style="color:var(--accent-blue); font-weight:bold;">y = f(x) =</i>
+                <span class="frac">
+                    <span class="frac-num">${formatMathToken(num)}</span>
+                    <span class="frac-den">${formatMathToken(den)}</span>
+                </span>
+            `;
+        } else {
+            display.innerHTML = `<i style="color:var(--accent-blue); font-weight:bold;">y = f(x) =</i> <span>${formatMathToken(inputStr)}</span>`;
+        }
+    }
+
+    function isBalanced(s) {
+        let d = 0;
+        for (let c of s) {
+            if (c === '(') d++;
+            if (c === ')') d--;
+            if (d < 0) return false;
+        }
+        return d === 0;
+    }
+
+    function insertSymbol(sym) {
+        const inp = document.getElementById('eqInput');
+        const start = inp.selectionStart;
+        const end = inp.selectionEnd;
+        const val = inp.value;
+        inp.value = val.substring(0, start) + sym + val.substring(end);
+        inp.focus();
+        inp.selectionStart = inp.selectionEnd = start + sym.length;
+        renderPrettyMath();
+    }
+
+    // ================= 2. BIÊN DỊCH HÀM SỐ & TỰ ĐỘNG TÌM TIỆM CẬN + CỰC TIỂU =================
     function compileMathExpression(str) {
         let s = str.toLowerCase().replace(/\s+/g, '');
-        // Đổi lũy thừa ^ thành **
         s = s.replace(/\^/g, '**');
-        // Thêm dấu nhân ngầm định: 2x -> 2*x, )x -> )*x, 2( -> 2*(
         s = s.replace(/(\d)(x)/g, '$1*$2');
         s = s.replace(/(\d)(\()/g, '$1*$2');
         s = s.replace(/(\))(x|\d|\()/g, '$1*$2');
         s = s.replace(/(x)(\()/g, '$1*$2');
-        // Thay các hàm toán học phổ biến
-        s = s.replace(/sin\(/g, 'Math.sin(');
-        s = s.replace(/cos\(/g, 'Math.cos(');
-        s = s.replace(/tan\(/g, 'Math.tan(');
-        s = s.replace(/abs\(/g, 'Math.abs(');
-        s = s.replace(/sqrt\(/g, 'Math.sqrt(');
-        s = s.replace(/exp\(/g, 'Math.exp(');
+        s = s.replace(/(^|[^a-z])(sin|cos|tan|abs|sqrt|exp|log)\(/g, '$1Math.$2(');
         s = s.replace(/ln\(/g, 'Math.log(');
+        s = s.replace(/pi/g, 'Math.PI');
         return s;
     }
 
     function f(x) {
+        if (!compiledFn) return NaN;
         try {
-            const fn = new Function('x', `return ${compiledExpr};`);
-            const val = fn(x);
-            return isFinite(val) ? val : 0;
+            const val = compiledFn(x);
+            return (typeof val === 'number' && isFinite(val)) ? val : NaN;
         } catch (e) {
-            return 0;
+            return NaN;
         }
     }
 
-    // Tính đạo hàm bằng định nghĩa giới hạn (Sai phân trung tâm)
     function df(x) {
         const h = 0.00001;
-        return (f(x + h) - f(x - h)) / (2 * h);
+        const y1 = f(x - h);
+        const y2 = f(x + h);
+        if (isNaN(y1) || isNaN(y2)) return NaN;
+        return (y2 - y1) / (2 * h);
     }
 
-    // Tự động quét tìm đáy thấp nhất (Cực tiểu toàn cục) để đặt Cờ Đích
-    function findGlobalMinimum() {
-        let bestX = 0;
-        let minY = Infinity;
-        for (let x = -8; x <= 8; x += 0.02) {
-            let y = f(x);
-            if (y < minY) {
-                minY = y;
-                bestX = x;
+    // Thuật toán dò Tiệm Cận Đứng (TCĐ), Tiệm Cận Ngang (TCN) & Tiệm Cận Xiên (TCX)
+    function analyzeFunctionAndAsymptotes() {
+        verticalAsymptotes = [];
+        obliqueAsymptote = null;
+
+        // 1. Dò Tiệm cận đứng trong khoảng [-15, 15]
+        const step = 0.02;
+        for (let x = -15; x <= 15; x += step) {
+            let y1 = f(x);
+            let y2 = f(x + step);
+            // Nếu hàm đổi dấu đột ngột với biên độ cực lớn -> Có TCĐ
+            if (!isNaN(y1) && !isNaN(y2)) {
+                if ((y1 * y2 < 0) && Math.abs(y1 - y2) > 45) {
+                    // Chia đôi khoảng để tìm chính xác x tiệm cận
+                    let low = x, high = x + step;
+                    for (let k = 0; k < 15; k++) {
+                        let mid = (low + high) / 2;
+                        if (f(low) * f(mid) <= 0) high = mid;
+                        else low = mid;
+                    }
+                    let asymX = Math.round(((low + high) / 2) * 100) / 100;
+                    if (!verticalAsymptotes.some(v => Math.abs(v - asymX) < 0.1)) {
+                        verticalAsymptotes.push(asymX);
+                    }
+                }
             }
         }
-        // Tinh chỉnh bằng vài bước đạo hàm nhỏ quanh bestX
-        for (let i = 0; i < 15; i++) {
-            bestX = bestX - 0.05 * df(bestX);
+
+        // 2. Dò Tiệm cận ngang (TCN) hoặc Tiệm cận xiên (TCX) khi x -> +oo (x = 1000)
+        const bigX = 800;
+        const yBig = f(bigX);
+        const yBigNext = f(bigX + 10);
+        if (!isNaN(yBig) && !isNaN(yBigNext)) {
+            const m = (yBigNext - yBig) / 10; // Hệ số góc a = lim f(x)/x
+            const b = yBig - m * bigX;        // Hệ số b = lim (f(x) - a*x)
+            // Kiểm tra xem tại x = 400 đồ thị có bám sát đường y = m*x + b không
+            const checkY = f(400);
+            const lineY = m * 400 + b;
+            if (Math.abs(checkY - lineY) < 0.15 && Math.abs(m) < 20) {
+                const cleanM = Math.round(m * 100) / 100;
+                const cleanB = Math.round(b * 100) / 100;
+                if (Math.abs(cleanM) < 0.005) {
+                    obliqueAsymptote = { m: 0, b: cleanB, type: 'TCN' };
+                } else {
+                    obliqueAsymptote = { m: cleanM, b: cleanB, type: 'TCX' };
+                }
+            }
         }
-        targetX = bestX;
-        targetY = f(targetX);
-        document.getElementById('targetInfoText').innerText = `Mục tiêu cần lực chuẩn: x* ≈ ${targetX.toFixed(2)}`;
+
+        // Hiển thị thông tin Tiệm cận lên thanh công cụ
+        let infoParts = [];
+        if (verticalAsymptotes.length > 0) {
+            infoParts.push(`TCĐ: x = ${verticalAsymptotes.join(', ')}`);
+        }
+        if (obliqueAsymptote) {
+            if (obliqueAsymptote.type === 'TCN') {
+                infoParts.push(`TCN: y = ${obliqueAsymptote.b}`);
+            } else {
+                const sign = obliqueAsymptote.b >= 0 ? `+ ${obliqueAsymptote.b}` : `- ${Math.abs(obliqueAsymptote.b)}`;
+                const mStr = obliqueAsymptote.m === 1 ? 'x' : (obliqueAsymptote.m === -1 ? '-x' : `${obliqueAsymptote.m}x`);
+                infoParts.push(`TCX: y = ${mStr} ${obliqueAsymptote.b !== 0 ? sign : ''}`);
+            }
+        }
+        document.getElementById('asymptoteInfo').innerText = infoParts.length > 0 ? infoParts.join(' | ') : 'Tiệm cận: Không có';
+
+        // 3. Dò tìm Điểm Cực Tiểu Địa Phương thực sự (Tránh bị lừa bởi Tiệm cận đứng -oo)
+        let minimaCandidates = [];
+        for (let x = -10; x <= 10; x += 0.025) {
+            // Bỏ qua vùng sát tiệm cận đứng
+            if (verticalAsymptotes.some(va => Math.abs(x - va) < 0.15)) continue;
+
+            let s1 = df(x - 0.025);
+            let s2 = df(x + 0.025);
+            // Cực tiểu là nơi đạo hàm đổi dấu từ Âm sang Dương và liên tục
+            if (!isNaN(s1) && !isNaN(s2) && s1 < 0 && s2 > 0 && Math.abs(s2 - s1) < 25) {
+                let low = x - 0.025, high = x + 0.025;
+                for (let k = 0; k < 12; k++) {
+                    let mid = (low + high) / 2;
+                    if (df(mid) < 0) low = mid;
+                    else high = mid;
+                }
+                let rootX = (low + high) / 2;
+                let rootY = f(rootX);
+                if (!isNaN(rootY) && Math.abs(rootY) < 200) {
+                    minimaCandidates.push({ x: rootX, y: rootY });
+                }
+            }
+        }
+
+        if (minimaCandidates.length > 0) {
+            // Chọn điểm cực tiểu tốt nhất
+            minimaCandidates.sort((a, b) => a.y - b.y);
+            targetX = minimaCandidates[0].x;
+            targetY = minimaCandidates[0].y;
+            document.getElementById('targetInfoText').innerText = `Đích Cực Tiểu: (${targetX.toFixed(2)}, ${targetY.toFixed(2)})`;
+        } else {
+            // Nếu hàm không có cực trị (VD: hàm nhất biến), đặt cờ tham chiếu tại x = 2
+            targetX = 2.0;
+            targetY = f(targetX) || 0;
+            document.getElementById('targetInfoText').innerText = `Hàm không có cực tiểu (Đặt đích mẫu x = ${targetX.toFixed(1)})`;
+        }
     }
 
-    // ================= XỬ LÝ SỰ KIỆN GIAO DIỆN =================
-    function setPreset(expr, startX) {
-        document.getElementById('eqInput').value = expr;
-        document.querySelectorAll('.eq-bar .btn-outline').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
-        applyEquationInternal(expr, startX);
+    // ================= 3. XỬ LÝ TƯƠNG TÁC CHUỘT KIỂU GEOGEBRA (ZOOM, PAN, POINT) =================
+    function toScreenX(mathX) {
+        return graphCanvas.width / 2 + (mathX - cam.centerX) * cam.scale;
+    }
+    function toScreenY(mathY) {
+        return graphCanvas.height / 2 - (mathY - cam.centerY) * cam.scale;
+    }
+    function toMathX(px) {
+        return cam.centerX + (px - graphCanvas.width / 2) / cam.scale;
+    }
+    function toMathY(py) {
+        return cam.centerY - (py - graphCanvas.height / 2) / cam.scale;
     }
 
-    function applyCustomEquation() {
-        const expr = document.getElementById('eqInput').value;
-        applyEquationInternal(expr, -2.5);
+    // Cuộn con lăn chuột để Phóng to / Thu nhỏ ngay tại tâm chuột
+    graphCanvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const rect = graphCanvas.getBoundingClientRect();
+        const mousePx = e.clientX - rect.left;
+        const mousePy = e.clientY - rect.top;
+
+        const mathXBefore = toMathX(mousePx);
+        const mathYBefore = toMathY(mousePy);
+
+        const zoomFactor = e.deltaY < 0 ? 1.15 : 0.87;
+        cam.scale = Math.max(8, Math.min(400, cam.scale * zoomFactor));
+
+        // Giữ nguyên điểm dưới con trỏ chuột sau khi zoom
+        cam.centerX = mathXBefore - (mousePx - graphCanvas.width / 2) / cam.scale;
+        cam.centerY = mathYBefore + (mousePy - graphCanvas.height / 2) / cam.scale;
+    }, { passive: false });
+
+    // Kéo thả đồ thị (Pan) hoặc Chấm Điểm / Đặt AI
+    let isDraggingGraph = false;
+    let dragStart = { x: 0, y: 0, camX: 0, camY: 0 };
+
+    graphCanvas.addEventListener('mousedown', (e) => {
+        const rect = graphCanvas.getBoundingClientRect();
+        const px = e.clientX - rect.left;
+        const py = e.clientY - rect.top;
+        const mx = toMathX(px);
+
+        if (mouseMode === "PAN") {
+            isDraggingGraph = true;
+            dragStart = { x: px, y: py, camX: cam.centerX, camY: cam.centerY };
+            graphCanvas.style.cursor = "grabbing";
+        } else if (mouseMode === "AI") {
+            stopAutoPlay();
+            resetToPosition(mx);
+        } else if (mouseMode === "POINT") {
+            const my = f(mx);
+            if (!isNaN(my)) {
+                const labelChar = String.fromCharCode(65 + (userPoints.length % 26)); // A, B, C...
+                userPoints.push({ label: labelChar, x: mx, y: my });
+                updatePointsUI();
+            }
+        }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isDraggingGraph) return;
+        const rect = graphCanvas.getBoundingClientRect();
+        const px = e.clientX - rect.left;
+        const py = e.clientY - rect.top;
+        cam.centerX = dragStart.camX - (px - dragStart.x) / cam.scale;
+        cam.centerY = dragStart.camY + (py - dragStart.y) / cam.scale;
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (isDraggingGraph) {
+            isDraggingGraph = false;
+            graphCanvas.style.cursor = mouseMode === "PAN" ? "grab" : "crosshair";
+        }
+    });
+
+    function setMouseMode(mode) {
+        mouseMode = mode;
+        document.getElementById('modePan').classList.toggle('active', mode === 'PAN');
+        document.getElementById('modePlaceAI').classList.toggle('active', mode === 'AI');
+        document.getElementById('modePoint').classList.toggle('active', mode === 'POINT');
+        graphCanvas.style.cursor = mode === 'PAN' ? 'grab' : 'crosshair';
     }
 
-    function applyEquationInternal(expr, startX) {
-        stopAutoPlay();
-        rawExpr = expr;
-        compiledExpr = compileMathExpression(expr);
-        // Kiểm tra lỗi cú pháp
-        try {
-            const test = new Function('x', `return ${compiledExpr};`)(1);
-            if (isNaN(test)) throw new Error("NaN");
-        } catch (err) {
-            alert("Hàm số nhập vào chưa đúng cú pháp! Ví dụ hợp lệ: x^2 - 4x + 4 hoặc sin(x) + 0.5*x^2");
+    function updatePointsUI() {
+        const box = document.getElementById('pointsBox');
+        const list = document.getElementById('pointsList');
+        if (userPoints.length === 0) {
+            box.style.display = "none";
             return;
         }
-        findGlobalMinimum();
-        resetToPosition(startX);
+        box.style.display = "block";
+        list.innerHTML = userPoints.map(pt =>
+            `<div class="point-item">
+                <span><b>${pt.label}</b>(${pt.x.toFixed(2)}; ${pt.y.toFixed(2)})</span>
+                <span style="color:#94a3b8;">k=${df(pt.x).toFixed(2)}</span>
+            </div>`
+        ).join('');
+    }
+
+    function clearCustomPoints() {
+        userPoints = [];
+        updatePointsUI();
+    }
+
+    function toggleView(type) {
+        if (type === 'AXES') {
+            showAxes = !showAxes;
+            document.getElementById('btnAxes').classList.toggle('active', showAxes);
+        } else if (type === 'GRID') {
+            showGrid = !showGrid;
+            document.getElementById('btnGrid').classList.toggle('active', showGrid);
+        } else if (type === 'ASYMP') {
+            showAsymptotes = !showAsymptotes;
+            document.getElementById('btnAsymp').classList.toggle('active', showAsymptotes);
+        } else if (type === 'FOG') {
+            fogMode = !fogMode;
+            document.getElementById('btnFog').classList.toggle('active', fogMode);
+        }
+    }
+
+    function updateCurveColor(col) {
+        curveColor = col;
+    }
+
+    function resetCamera() {
+        cam.centerX = isFinite(targetX) ? targetX * 0.5 : 0;
+        cam.centerY = isFinite(targetY) ? targetY : 0;
+        cam.scale = 50;
+    }
+
+    // ================= 4. VẼ ĐỒ THỊ CHUẨN GEOGEBRA =================
+    function getNiceGridStep(scalePx) {
+        const idealMathStep = 75 / scalePx;
+        const mag = Math.pow(10, Math.floor(Math.log10(idealMathStep)));
+        const residual = idealMathStep / mag;
+        if (residual > 5) return 10 * mag;
+        if (residual > 2) return 5 * mag;
+        if (residual > 1) return 2 * mag;
+        return mag;
+    }
+
+    function drawGraph() {
+        const w = graphCanvas.width = graphCanvas.clientWidth;
+        const h = graphCanvas.height = graphCanvas.clientHeight;
+        gCtx.clearRect(0, 0, w, h);
+
+        const xMin = toMathX(0), xMax = toMathX(w);
+        const yMin = toMathY(h), yMax = toMathY(0);
+        const step = getNiceGridStep(cam.scale);
+
+        // 1. Vẽ Lưới tọa độ (Grid)
+        if (showGrid) {
+            gCtx.strokeStyle = "#162238";
+            gCtx.lineWidth = 1;
+            const firstX = Math.floor(xMin / step) * step;
+            for (let gx = firstX; gx <= xMax; gx += step) {
+                const px = toScreenX(gx);
+                gCtx.beginPath(); gCtx.moveTo(px, 0); gCtx.lineTo(px, h); gCtx.stroke();
+            }
+            const firstY = Math.floor(yMin / step) * step;
+            for (let gy = firstY; gy <= yMax; gy += step) {
+                const py = toScreenY(gy);
+                gCtx.beginPath(); gCtx.moveTo(0, py); gCtx.lineTo(w, py); gCtx.stroke();
+            }
+        }
+
+        // 2. Vẽ Trục tọa độ Ox, Oy và Số đo
+        if (showAxes) {
+            const originX = toScreenX(0);
+            const originY = toScreenY(0);
+
+            gCtx.strokeStyle = "#64748b";
+            gCtx.lineWidth = 1.8;
+            gCtx.beginPath();
+            gCtx.moveTo(0, originY); gCtx.lineTo(w, originY);
+            gCtx.moveTo(originX, 0); gCtx.lineTo(originX, h);
+            gCtx.stroke();
+
+            // Tên trục x, y và gốc O
+            gCtx.fillStyle = "#94a3b8";
+            gCtx.font = "bold 13px sans-serif";
+            gCtx.fillText("x", w - 16, originY - 8);
+            gCtx.fillText("y", originX + 10, 16);
+            gCtx.fillText("O", originX - 15, originY + 16);
+
+            // Số trên trục
+            gCtx.font = "11px sans-serif";
+            const firstX = Math.floor(xMin / step) * step;
+            for (let gx = firstX; gx <= xMax; gx += step) {
+                if (Math.abs(gx) < 1e-6) continue;
+                const px = toScreenX(gx);
+                const label = Number(gx.toFixed(2)).toString();
+                gCtx.fillText(label, px - 8, Math.min(h - 6, Math.max(14, originY + 15)));
+            }
+            const firstY = Math.floor(yMin / step) * step;
+            for (let gy = firstY; gy <= yMax; gy += step) {
+                if (Math.abs(gy) < 1e-6) continue;
+                const py = toScreenY(gy);
+                const label = Number(gy.toFixed(2)).toString();
+                gCtx.fillText(label, Math.min(w - 28, Math.max(4, originX + 6)), py + 4);
+            }
+        }
+
+        // 3. Vẽ Đường Tiệm Cận Đứng (TCĐ) & Tiệm Cận Ngang/Xiên (TCN/TCX)
+        if (showAsymptotes) {
+            gCtx.save();
+            gCtx.setLineDash([6, 6]);
+            gCtx.lineWidth = 1.8;
+
+            // Tiệm cận đứng
+            verticalAsymptotes.forEach(va => {
+                const px = toScreenX(va);
+                if (px >= 0 && px <= w) {
+                    gCtx.strokeStyle = "#f43f5e";
+                    gCtx.beginPath(); gCtx.moveTo(px, 0); gCtx.lineTo(px, h); gCtx.stroke();
+                    gCtx.fillStyle = "#fb7185";
+                    gCtx.font = "bold 12px sans-serif";
+                    gCtx.fillText(`TCĐ: x = ${va}`, px + 6, 22);
+                }
+            });
+
+            // Tiệm cận ngang / xiên
+            if (obliqueAsymptote) {
+                const yStart = obliqueAsymptote.m * xMin + obliqueAsymptote.b;
+                const yEnd = obliqueAsymptote.m * xMax + obliqueAsymptote.b;
+                gCtx.strokeStyle = "#c084fc";
+                gCtx.beginPath();
+                gCtx.moveTo(toScreenX(xMin), toScreenY(yStart));
+                gCtx.lineTo(toScreenX(xMax), toScreenY(yEnd));
+                gCtx.stroke();
+
+                gCtx.fillStyle = "#d8b4fe";
+                gCtx.font = "bold 12px sans-serif";
+                const midX = (xMin + xMax) * 0.35;
+                const midY = obliqueAsymptote.m * midX + obliqueAsymptote.b;
+                gCtx.fillText(obliqueAsymptote.type, toScreenX(midX) + 8, toScreenY(midY) - 8);
+            }
+            gCtx.restore();
+        }
+
+        // 4. Vẽ Đường Cong Đồ Thị y = f(x) (Tự động ngắt nét tại Tiệm cận đứng)
+        gCtx.save();
+        if (fogMode) {
+            gCtx.beginPath();
+            gCtx.arc(toScreenX(currentX), toScreenY(f(currentX)), 80, 0, Math.PI * 2);
+            gCtx.clip();
+        }
+
+        gCtx.strokeStyle = curveColor;
+        gCtx.lineWidth = 3;
+        gCtx.beginPath();
+
+        let isDrawing = false;
+        let prevPy = 0;
+
+        for (let px = 0; px <= w; px += 1.5) {
+            const mx = toMathX(px);
+            // Kiểm tra nếu sát Tiệm cận đứng thì ngắt nét
+            if (verticalAsymptotes.some(va => Math.abs(mx - va) < (1.6 / cam.scale))) {
+                isDrawing = false;
+                continue;
+            }
+            const my = f(mx);
+            if (isNaN(my)) {
+                isDrawing = false;
+                continue;
+            }
+            const py = toScreenY(my);
+            // Ngắt nét nếu bước nhảy pixel dọc quá đột ngột (vọt từ +oo sang -oo)
+            if (isDrawing && Math.abs(py - prevPy) > h * 1.5) {
+                isDrawing = false;
+            }
+            if (!isDrawing) {
+                gCtx.moveTo(px, py);
+                isDrawing = true;
+            } else {
+                gCtx.lineTo(px, py);
+            }
+            prevPy = py;
+        }
+        gCtx.stroke();
+        gCtx.restore();
+
+        // 5. Vẽ Cờ Đích Cực Tiểu
+        const flagPx = toScreenX(targetX);
+        const flagPy = toScreenY(targetY);
+        if (flagPx >= -50 && flagPx <= w + 50) {
+            gCtx.strokeStyle = "#22c55e";
+            gCtx.lineWidth = 2;
+            gCtx.beginPath();
+            gCtx.moveTo(flagPx, flagPy);
+            gCtx.lineTo(flagPx, flagPy - 28);
+            gCtx.stroke();
+            gCtx.fillStyle = "#22c55e";
+            gCtx.font = "bold 12px sans-serif";
+            gCtx.fillText(`🏁 Cực tiểu (${targetX.toFixed(1)}; ${targetY.toFixed(1)})`, flagPx - 55, flagPy + 18);
+        }
+
+        // 6. Vẽ các Điểm khảo sát A, B, C người dùng chấm trên đồ thị
+        userPoints.forEach(pt => {
+            const px = toScreenX(pt.x);
+            const py = toScreenY(pt.y);
+            gCtx.fillStyle = "#fde047";
+            gCtx.strokeStyle = "#000";
+            gCtx.lineWidth = 2;
+            gCtx.beginPath();
+            gCtx.arc(px, py, 6, 0, Math.PI * 2);
+            gCtx.fill();
+            gCtx.stroke();
+            gCtx.font = "bold 12px sans-serif";
+            gCtx.fillText(`${pt.label}(${pt.x.toFixed(1)}; ${pt.y.toFixed(1)})`, px + 8, py - 8);
+        });
+
+        // 7. Vẽ vết đường đi của AI & Đường Tiếp Tuyến (Đạo hàm)
+        for (let i = 0; i < historyPoints.length - 1; i++) {
+            const p1 = historyPoints[i], p2 = historyPoints[i + 1];
+            gCtx.strokeStyle = "rgba(245, 158, 11, 0.55)";
+            gCtx.setLineDash([4, 4]);
+            gCtx.beginPath();
+            gCtx.moveTo(toScreenX(p1.x), toScreenY(p1.y));
+            gCtx.lineTo(toScreenX(p2.x), toScreenY(p2.y));
+            gCtx.stroke();
+            gCtx.setLineDash([]);
+        }
+
+        const curY = f(currentX);
+        const slope = df(currentX);
+        if (!isNaN(curY) && !isNaN(slope)) {
+            const ballPx = toScreenX(currentX);
+            const ballPy = toScreenY(curY);
+
+            // Vẽ tiếp tuyến màu cam
+            const deltaX = 75 / cam.scale;
+            gCtx.strokeStyle = "#f59e0b";
+            gCtx.lineWidth = 2.5;
+            gCtx.beginPath();
+            gCtx.moveTo(toScreenX(currentX - deltaX), toScreenY(curY - slope * deltaX));
+            gCtx.lineTo(toScreenX(currentX + deltaX), toScreenY(curY + slope * deltaX));
+            gCtx.stroke();
+
+            // Vẽ Viên Bi AI
+            gCtx.fillStyle = "#ffffff";
+            gCtx.strokeStyle = "#0ea5e9";
+            gCtx.lineWidth = 4;
+            gCtx.beginPath();
+            gCtx.arc(ballPx, ballPy, 8, 0, Math.PI * 2);
+            gCtx.fill();
+            gCtx.stroke();
+        }
+    }
+
+    // ================= 5. CHU TRÌNH AI BẮN THỬ & TỰ SỬA SAI =================
+    function loadPreset(expr, startX) {
+        document.getElementById('eqInput').value = expr;
+        document.querySelectorAll('.preset-group .btn-outline').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        applyEquation(startX);
+    }
+
+    function applyEquation(customStartX = null) {
+        stopAutoPlay();
+        renderPrettyMath();
+        const expr = document.getElementById('eqInput').value;
+        try {
+            const code = compileMathExpression(expr);
+            compiledFn = new Function('x', `return ${code};`);
+            compiledFn(1.23); // Test thử
+        } catch (err) {
+            alert("Hàm số chưa đúng cú pháp! Hãy kiểm tra lại dấu ngoặc.");
+            return;
+        }
+
+        userPoints = [];
+        updatePointsUI();
+        analyzeFunctionAndAsymptotes();
+
+        // Đặt lại Camera bao quát điểm cực tiểu
+        cam.centerX = isFinite(targetX) ? targetX : 1.0;
+        cam.centerY = isFinite(targetY) ? targetY + 1.5 : 2.0;
+        cam.scale = 45;
+
+        const initX = customStartX !== null ? customStartX : (targetX + 2.2);
+        resetToPosition(initX);
     }
 
     function resetRandom() {
         stopAutoPlay();
-        // Chọn vị trí ngẫu nhiên cách xa mục tiêu để thấy rõ quá trình học
-        let randX = (Math.random() * 8) - 4;
-        if (Math.abs(randX - targetX) < 1.5) randX = targetX - 3.0;
-        resetToPosition(randX);
+        let rx = targetX + (Math.random() > 0.5 ? 2.4 : -2.2);
+        // Nếu có tiệm cận đứng nằm giữa rx và targetX, đặt rx cùng phía với targetX để không vướng vô cực
+        verticalAsymptotes.forEach(va => {
+            if ((targetX > va && rx <= va) || (targetX < va && rx >= va)) {
+                rx = targetX + (targetX > va ? 2.2 : -2.2);
+            }
+        });
+        resetToPosition(rx);
     }
 
     function resetToPosition(newX) {
@@ -621,53 +1255,24 @@
         animPhase = "IDLE";
         document.getElementById('historyBody').innerHTML = `
             <tr>
-                <td colspan="5" style="text-align:center; color: var(--text-muted); padding: 18px;">
-                    Đã đặt AI ở lực bắn <b>x = ${currentX.toFixed(2)}</b>. Hãy bấm "Bắn Thử" hoặc "AI Tự Học"!
+                <td colspan="5" style="text-align:center; color: var(--text-muted); padding: 25px;">
+                    AI đang ở vị trí <b>x = ${currentX.toFixed(2)}</b>. Bấm "Bắn Thử" hoặc "AI Tự Học" để bắt đầu!
                 </td>
             </tr>
         `;
-        updateThoughtBubble(true);
+        updateStatusText(true);
     }
 
     function updateLR(val) {
         learningRate = parseFloat(val);
-        let desc = "Vừa phải";
-        if (learningRate < 0.08) desc = "Nhích từng tí";
-        else if (learningRate > 0.8) desc = "Quá lớn - Dễ văng lố";
-        document.getElementById('lrVal').innerText = `${desc} (${learningRate.toFixed(2)})`;
+        document.getElementById('lrVal').innerText = learningRate.toFixed(2);
     }
 
-    function setLRPreset(val) {
-        document.getElementById('lrSlider').value = val;
-        updateLR(val);
-    }
-
-    function toggleFogMode() {
-        fogMode = !fogMode;
-        const btn = document.getElementById('fogBtn');
-        btn.classList.toggle('active', fogMode);
-        btn.innerText = fogMode ? "👁️ Góc nhìn của AI (Bịt mắt): BẬT" : "👁️ Góc nhìn của AI (Bịt mắt): TẮT";
-    }
-
-    function zoomGraph(factor) {
-        xRange = Math.max(2, Math.min(20, xRange * factor));
-    }
-
-    // Cho phép click trực tiếp lên đồ thị để chọn vị trí xuất phát
-    graphCanvas.addEventListener('click', (e) => {
-        const rect = graphCanvas.getBoundingClientRect();
-        const clickX = e.clientX - rect.left;
-        const mathX = ((clickX / graphCanvas.width) - 0.5) * 2 * xRange;
-        stopAutoPlay();
-        resetToPosition(mathX);
-    });
-
-    // ================= CHU TRÌNH: BẮN -> SAI -> TÍNH ĐẠO HÀM -> SỬA =================
     function toggleAutoPlay() {
         isAutoPlaying = !isAutoPlaying;
         const btn = document.getElementById('autoBtn');
         if (isAutoPlaying) {
-            btn.innerHTML = "⏸️ Tạm Dừng Tự Học";
+            btn.innerHTML = "⏸️ Tạm Dừng";
             btn.style.background = "#ef4444";
             btn.style.color = "#fff";
             if (animPhase === "IDLE") startShotCycle();
@@ -679,76 +1284,60 @@
     function stopAutoPlay() {
         isAutoPlaying = false;
         const btn = document.getElementById('autoBtn');
-        btn.innerHTML = "▶️ AI Tự Học Liên Tục (Thử & Sai)";
+        btn.innerHTML = "▶️ AI Tự Học Liên Tục";
         btn.style.background = "var(--accent-green)";
         btn.style.color = "#052e16";
     }
 
     function triggerSingleShot() {
         stopAutoPlay();
-        if (animPhase === "IDLE") {
-            startShotCycle();
-        }
+        if (animPhase === "IDLE") startShotCycle();
     }
 
     function startShotCycle() {
         shotCount++;
         animPhase = "FLYING";
         projectile.progress = 0;
-        updateThoughtBubble();
+        updateStatusText();
     }
 
-    // Cập nhật hộp thoại giải thích và bảng lịch sử
-    function updateThoughtBubble(isInit = false) {
+    function computeSafeNextX(x, slope) {
+        // Kẹp đạo hàm tối đa để không bị văng vô cực khi đứng gần tiệm cận đứng
+        const clampedSlope = Math.max(-15, Math.min(15, slope));
+        let nextX = x - learningRate * clampedSlope;
+
+        // Ngăn bước nhảy xuyên qua Tiệm cận đứng
+        verticalAsymptotes.forEach(va => {
+            if ((x > va && nextX <= va) || (x < va && nextX >= va)) {
+                nextX = va + (x > va ? 0.25 : -0.25);
+            }
+        });
+        return nextX;
+    }
+
+    function updateStatusText(isInit = false) {
         const slope = df(currentX);
-        const yVal = f(currentX);
-        const showMath = document.getElementById('showMathFormula').checked;
         const badge = document.getElementById('stepStatusBadge');
-        const narrative = document.getElementById('aiNarrative');
-        const ruleBox = document.getElementById('aiRuleExplain');
-        document.getElementById('shotCountText').innerText = `Phát bắn thứ: ${shotCount}`;
+        const desc = document.getElementById('aiNarrative');
+        document.getElementById('shotCountText').innerText = `Lần thử thứ: ${shotCount}`;
 
         if (isInit) {
-            badge.innerText = "🤖 TRẠNG THÁI AI: SẴN SÀNG KHAI HỎA";
-            badge.style.color = "var(--accent-blue)";
-            narrative.innerHTML = `AI đang chọn đại lực bắn ban đầu <b>x = ${currentX.toFixed(2)}</b>. Nó chưa biết mục tiêu ở đâu. Hãy bấm bắn thử để xem đạn rơi chỗ nào!`;
+            badge.innerText = "🤖 SẴN SÀNG KHẢO SÁT";
+            desc.innerHTML = `Vị trí hiện tại: <b>x = ${currentX.toFixed(2)}</b>, giá trị hàm <b>f(x) = ${f(currentX).toFixed(2)}</b>, hệ số góc tiếp tuyến <b>f'(x) = ${slope.toFixed(2)}</b>.`;
             return;
         }
 
-        const isHit = Math.abs(slope) < 0.05 && Math.abs(currentX - targetX) < 0.15;
-        const isLocalTrap = Math.abs(slope) < 0.05 && Math.abs(currentX - targetX) >= 0.15;
-
-        if (animPhase === "FLYING") {
-            badge.innerText = "🚀 BƯỚC 1: XE TĂNG ĐANG BẮN THỬ...";
-            badge.style.color = "var(--accent-amber)";
-            narrative.innerHTML = `Đang khai hỏa với lực bắn <b>x = ${currentX.toFixed(2)}</b>... Cùng xem viên đạn rơi lệch mục tiêu bao xa!`;
-        } else if (animPhase === "EXPLODED" || animPhase === "MOVING" || animPhase === "IDLE") {
-            if (isHit) {
-                badge.innerText = "🏆 HOÀN HẢO: ĐẠO HÀM = 0 (ĐÃ TỚI ĐÁY THUNG LŨNG!)";
-                badge.style.color = "var(--accent-green)";
-                narrative.innerHTML = `<b>TRÚNG HỒNG TÂM!</b> Tại <b>x = ${currentX.toFixed(2)}</b>, mặt đất dưới chân AI đã phẳng lì (Đạo hàm <b>f'(x) ≈ 0</b>). AI biết mình đã ở đáy cực tiểu nên dừng lại không chỉnh nữa!`;
-            } else if (isLocalTrap) {
-                badge.innerText = "⚠️ CẢNH BÁO: MẮC KẸT Ở BẪY CỰC TIỂU ĐỊA PHƯƠNG!";
-                badge.style.color = "var(--accent-red)";
-                narrative.innerHTML = `Tại <b>x = ${currentX.toFixed(2)}</b>, đạo hàm cũng bằng <b>0</b> (đáy hố nông), làm AI tưởng đã bắn trúng và dừng lại! Trong Toán 12, đây là <b>Cực tiểu địa phương</b> chứ chưa phải giá trị nhỏ nhất toàn cục.`;
-            } else if (slope < 0) {
-                badge.innerText = "📉 BƯỚC 2 & 3: PHÁT HIỆN ĐẠO HÀM ÂM -> TỰ ĐỘNG TĂNG LỰC!";
-                badge.style.color = "var(--accent-amber)";
-                let nextX = currentX - learningRate * slope;
-                narrative.innerHTML = `Đạn rơi chưa tới đích! AI đo độ nghiêng tại chỗ đứng thấy <b>Đạo hàm f'(${currentX.toFixed(2)}) = ${slope.toFixed(2)} < 0 (Âm)</b> — tức là dốc đang đi xuống về bên phải. <br>👉 <b>AI tự sửa:</b> Tăng lực bắn sang phải (từ <b>${currentX.toFixed(2)}</b> lên <b>${nextX.toFixed(2)}</b>).`;
-            } else {
-                badge.innerText = "📈 BƯỚC 2 & 3: PHÁT HIỆN ĐẠO HÀM DƯƠNG -> TỰ ĐỘNG GIẢM LỰC!";
-                badge.style.color = "var(--accent-red)";
-                let nextX = currentX - learningRate * slope;
-                narrative.innerHTML = `Đạn bắn vọt lố mục tiêu! AI đo độ nghiêng thấy <b>Đạo hàm f'(${currentX.toFixed(2)}) = +${slope.toFixed(2)} > 0 (Dương)</b> — tức là dốc đang đi lên về bên phải. <br>👉 <b>AI tự sửa:</b> Giảm lực bắn lùi sang trái (từ <b>${currentX.toFixed(2)}</b> về <b>${nextX.toFixed(2)}</b>).`;
-            }
-        }
-
-        if (showMath) {
-            let nextX = currentX - learningRate * slope;
-            ruleBox.innerHTML = `📐 <b>Công thức Gradient Descent:</b> x<sub>mới</sub> = x<sub>cũ</sub> - α · f'(x<sub>cũ</sub>) = ${currentX.toFixed(2)} - (${learningRate}) · (${slope.toFixed(2)}) = <b>${nextX.toFixed(2)}</b>`;
+        if (Math.abs(slope) < 0.04) {
+            badge.innerText = "🏆 ĐẠO HÀM f'(x) ≈ 0 — ĐÃ CHẠM ĐÁY CỰC TIỂU!";
+            desc.innerHTML = `Tại <b>x = ${currentX.toFixed(2)}</b>, tiếp tuyến nằm ngang (<b>f'(x) ≈ 0</b>). AI đã tìm ra điểm Cực tiểu và bắn trúng hồng tâm!`;
+        } else if (slope < 0) {
+            let nextX = computeSafeNextX(currentX, slope);
+            badge.innerText = "📉 ĐẠO HÀM ÂM (f'(x) < 0) 👉 TĂNG X SANG PHẢI";
+            desc.innerHTML = `Tại <b>x = ${currentX.toFixed(2)}</b>, đạo hàm <b>f'(x) = ${slope.toFixed(2)} < 0</b> (hàm nghịch biến). AI tự động tăng lực bắn lên <b>${nextX.toFixed(2)}</b>.`;
         } else {
-            ruleBox.innerHTML = `💡 <b>Mẹo thuyết trình:</b> Chỉ cần nhớ quy tắc <b>"Đi ngược dấu Đạo hàm"</b> — Đạo hàm Âm thì tiến sang phải (+), Đạo hàm Dương thì lùi sang trái (-)!`;
+            let nextX = computeSafeNextX(currentX, slope);
+            badge.innerText = "📈 ĐẠO HÀM DƯƠNG (f'(x) > 0) 👉 GIẢM X SANG TRÁI";
+            desc.innerHTML = `Tại <b>x = ${currentX.toFixed(2)}</b>, đạo hàm <b>f'(x) = +${slope.toFixed(2)} > 0</b> (hàm đồng biến). AI tự động giảm lực bắn về <b>${nextX.toFixed(2)}</b>.`;
         }
     }
 
@@ -757,349 +1346,120 @@
         if (shotNum === 1) tbody.innerHTML = "";
 
         const diff = xVal - targetX;
-        let resultText = "";
-        if (Math.abs(diff) < 0.15) {
-            resultText = `<span style="color:var(--accent-green); font-weight:bold;">🎯 Trúng đích!</span>`;
-        } else if (diff < 0) {
-            resultText = `<span style="color:var(--accent-amber);">Hụt ${Math.abs(diff).toFixed(2)}m (Non lực)</span>`;
-        } else {
-            resultText = `<span style="color:var(--accent-red);">Lố +${diff.toFixed(2)}m (Dư lực)</span>`;
-        }
+        let resHtml = Math.abs(diff) < 0.12
+            ? `<span style="color:var(--accent-green); font-weight:700;">🎯 Trúng đích!</span>`
+            : (diff < 0 ? `<span style="color:var(--accent-amber);">Hụt ${Math.abs(diff).toFixed(2)}m</span>` : `<span style="color:var(--accent-red);">Lố +${diff.toFixed(2)}m</span>`);
 
-        let slopeBadge = "";
-        let actionText = "";
-        if (Math.abs(slopeVal) < 0.05) {
-            slopeBadge = `<span class="badge badge-zero">f'(x) ≈ 0 (Đáy phẳng)</span>`;
-            actionText = `✅ Giữ nguyên lực bắn`;
-        } else if (slopeVal < 0) {
-            slopeBadge = `<span class="badge badge-neg">f'(x) = ${slopeVal.toFixed(2)} (Âm ↘)</span>`;
-            actionText = `👉 <b>Tăng lực</b> lên ${nextXVal.toFixed(2)}`;
-        } else {
-            slopeBadge = `<span class="badge badge-pos">f'(x) = +${slopeVal.toFixed(2)} (Dương ↗)</span>`;
-            actionText = `👈 <b>Giảm lực</b> về ${nextXVal.toFixed(2)}`;
-        }
+        let slopeHtml = Math.abs(slopeVal) < 0.04
+            ? `<span class="badge badge-zero">f'(x) ≈ 0</span>`
+            : (slopeVal < 0 ? `<span class="badge badge-neg">${slopeVal.toFixed(2)} (Âm)</span>` : `<span class="badge badge-pos">+${slopeVal.toFixed(2)} (Dương)</span>`);
 
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>#${shotNum}</td>
-            <td><b>${xVal.toFixed(2)}</b></td>
-            <td>${resultText}</td>
-            <td>${slopeBadge}</td>
-            <td>${actionText}</td>
-        `;
-        tbody.prepend(row);
+        let actHtml = Math.abs(slopeVal) < 0.04
+            ? `✅ Dừng tại cực tiểu`
+            : (slopeVal < 0 ? `👉 Tăng lên <b>${nextXVal.toFixed(2)}</b>` : `👈 Giảm về <b>${nextXVal.toFixed(2)}</b>`);
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>#${shotNum}</td><td><b>${xVal.toFixed(2)}</b></td><td>${resHtml}</td><td>${slopeHtml}</td><td>${actHtml}</td>`;
+        tbody.prepend(tr);
     }
 
-    // ================= VẼ ĐỒ THỊ HÀM SỐ & TIẾP TUYẾN =================
-    function drawGraph() {
-        const w = graphCanvas.width = graphCanvas.clientWidth;
-        const h = graphCanvas.height = graphCanvas.clientHeight;
-        gCtx.clearRect(0, 0, w, h);
-
-        // Chuyển đổi tọa độ Toán <-> Pixel
-        const yMin = targetY - 1.5;
-        const yMax = targetY + xRange * 1.8;
-        const toPxX = (x) => ((x / xRange) * 0.5 + 0.5) * w;
-        const toPxY = (y) => h - ((y - yMin) / (yMax - yMin)) * h;
-
-        // 1. Vẽ lưới tọa độ
-        gCtx.strokeStyle = "#1e293b";
-        gCtx.lineWidth = 1;
-        for (let gx = Math.ceil(-xRange); gx <= Math.floor(xRange); gx++) {
-            let px = toPxX(gx);
-            gCtx.beginPath(); gCtx.moveTo(px, 0); gCtx.lineTo(px, h); gCtx.stroke();
-            gCtx.fillStyle = "#64748b";
-            gCtx.font = "11px sans-serif";
-            gCtx.fillText(gx, px + 3, toPxY(0) - 5);
-        }
-
-        // Trục Ox, Oy
-        gCtx.strokeStyle = "#475569";
-        gCtx.lineWidth = 1.5;
-        gCtx.beginPath();
-        gCtx.moveTo(0, toPxY(0)); gCtx.lineTo(w, toPxY(0));
-        gCtx.moveTo(toPxX(0), 0); gCtx.lineTo(toPxX(0), h);
-        gCtx.stroke();
-
-        // 2. Vẽ đường cong hàm số y = f(x)
-        gCtx.save();
-        if (fogMode) {
-            // Nếu bật chế độ Bịt mắt AI: Chỉ mở vùng sáng nhỏ quanh viên bi
-            gCtx.beginPath();
-            gCtx.arc(toPxX(currentX), toPxY(f(currentX)), 78, 0, Math.PI * 2);
-            gCtx.clip();
-        }
-
-        gCtx.strokeStyle = "#38bdf8";
-        gCtx.lineWidth = 3;
-        gCtx.beginPath();
-        for (let px = 0; px <= w; px += 2) {
-            let mathX = ((px / w) - 0.5) * 2 * xRange;
-            let mathY = f(mathX);
-            let py = toPxY(mathY);
-            if (px === 0) gCtx.moveTo(px, py);
-            else gCtx.lineTo(px, py);
-        }
-        gCtx.stroke();
-        gCtx.restore();
-
-        // Nếu bật Fog Mode, vẽ lớp sương mù chú thích
-        if (fogMode) {
-            gCtx.fillStyle = "rgba(15, 23, 42, 0.55)";
-            gCtx.font = "bold 13px sans-serif";
-            gCtx.fillStyle = "#c084fc";
-            gCtx.fillText("🙈 AI không thấy toàn bộ đồ thị! Nó chỉ cảm nhận được độ nghiêng (đạo hàm) ngay dưới chân.", 16, 28);
-        }
-
-        // 3. Vẽ Cờ Đích tại đáy Cực Tiểu
-        const flagX = toPxX(targetX);
-        const flagY = toPxY(targetY);
-        gCtx.strokeStyle = "#22c55e";
-        gCtx.lineWidth = 2;
-        gCtx.beginPath();
-        gCtx.moveTo(flagX, flagY);
-        gCtx.lineTo(flagX, flagY - 32);
-        gCtx.stroke();
-        gCtx.fillStyle = "#22c55e";
-        gCtx.font = "bold 12px sans-serif";
-        gCtx.fillText("🏁 ĐÁY CỰC TIỂU (Trúng đích)", flagX - 75, flagY + 20);
-
-        // 4. Vẽ vết các bước mò đường cũ (Footsteps)
-        for (let i = 0; i < historyPoints.length - 1; i++) {
-            const pt1 = historyPoints[i];
-            const pt2 = historyPoints[i + 1];
-            const p1x = toPxX(pt1.x), p1y = toPxY(pt1.y);
-            const p2x = toPxX(pt2.x), p2y = toPxY(pt2.y);
-
-            gCtx.strokeStyle = "rgba(245, 158, 11, 0.5)";
-            gCtx.setLineDash([4, 4]);
-            gCtx.beginPath();
-            gCtx.moveTo(p1x, p1y);
-            gCtx.lineTo(p2x, p2y);
-            gCtx.stroke();
-            gCtx.setLineDash([]);
-
-            gCtx.fillStyle = "rgba(245, 158, 11, 0.6)";
-            gCtx.beginPath();
-            gCtx.arc(p1x, p1y, 5, 0, Math.PI * 2);
-            gCtx.fill();
-        }
-
-        // 5. Vẽ Đường Tiếp Tuyến (Đạo hàm) tại vị trí hiện tại
-        const curY = f(currentX);
-        const slope = df(currentX);
-        const ballPxX = toPxX(currentX);
-        const ballPxY = toPxY(curY);
-
-        const tanDeltaX = xRange * 0.22;
-        const x1 = currentX - tanDeltaX, y1 = curY - slope * tanDeltaX;
-        const x2 = currentX + tanDeltaX, y2 = curY + slope * tanDeltaX;
-
-        gCtx.strokeStyle = "#f59e0b";
-        gCtx.lineWidth = 2.5;
-        gCtx.beginPath();
-        gCtx.moveTo(toPxX(x1), toPxY(y1));
-        gCtx.lineTo(toPxX(x2), toPxY(y2));
-        gCtx.stroke();
-
-        // 6. Vẽ Mũi tên chỉ hướng "Đi ngược dấu đạo hàm"
-        if (Math.abs(slope) >= 0.05) {
-            const dir = slope < 0 ? 1 : -1; // Đạo hàm âm đi sang phải (+1), dương đi sang trái (-1)
-            const arrowLen = Math.min(75, Math.max(30, Math.abs(slope) * 18));
-            const arrowY = ballPxY - 26;
-
-            gCtx.strokeStyle = dir > 0 ? "#22c55e" : "#ef4444";
-            gCtx.fillStyle = dir > 0 ? "#22c55e" : "#ef4444";
-            gCtx.lineWidth = 3;
-
-            gCtx.beginPath();
-            gCtx.moveTo(ballPxX, arrowY);
-            gCtx.lineTo(ballPxX + dir * arrowLen, arrowY);
-            gCtx.stroke();
-
-            // Đầu mũi tên
-            gCtx.beginPath();
-            gCtx.moveTo(ballPxX + dir * (arrowLen + 6), arrowY);
-            gCtx.lineTo(ballPxX + dir * (arrowLen - 4), arrowY - 6);
-            gCtx.lineTo(ballPxX + dir * (arrowLen - 4), arrowY + 6);
-            gCtx.closePath();
-            gCtx.fill();
-
-            gCtx.font = "bold 12px sans-serif";
-            const label = slope < 0 ? "f'(x) Âm 👉 Tăng x" : "👈 Giảm x (vì f'(x) Dương)";
-            gCtx.fillText(label, ballPxX - 55, arrowY - 10);
-        }
-
-        // 7. Vẽ Viên Bi AI
-        gCtx.fillStyle = "#f8fafc";
-        gCtx.strokeStyle = "#0ea5e9";
-        gCtx.lineWidth = 4;
-        gCtx.beginPath();
-        gCtx.arc(ballPxX, ballPxY, 9, 0, Math.PI * 2);
-        gCtx.fill();
-        gCtx.stroke();
-    }
-
-    // ================= VẼ MÔ PHỎNG XE TĂNG BẮN MỤC TIÊU =================
+    // ================= 6. VẼ MÔ PHỎNG XE TĂNG BẮN ĐẠN =================
     function drawTankSim() {
         const w = tankCanvas.width = tankCanvas.clientWidth;
         const h = tankCanvas.height = tankCanvas.clientHeight;
         tCtx.clearRect(0, 0, w, h);
 
-        const groundY = h - 32;
+        const groundY = h - 28;
+        tCtx.fillStyle = "#151f32";
+        tCtx.fillRect(0, groundY, w, 28);
+        tCtx.strokeStyle = "#334155";
+        tCtx.beginPath(); tCtx.moveTo(0, groundY); tCtx.lineTo(w, groundY); tCtx.stroke();
 
-        // Mặt đất
-        tCtx.fillStyle = "#1e293b";
-        tCtx.fillRect(0, groundY, w, 32);
-        tCtx.strokeStyle = "#475569";
-        tCtx.beginPath();
-        tCtx.moveTo(0, groundY);
-        tCtx.lineTo(w, groundY);
-        tCtx.stroke();
+        const tankX = 50;
+        const scalePx = (w - 130) / 10;
+        const toTankPx = (valX) => (w * 0.58) + (valX - targetX) * scalePx;
 
-        // Vị trí Xe tăng (cố định bên trái) & Mục tiêu (bên phải)
-        const tankX = 55;
-        const mapScale = (w - 140) / (xRange * 2);
-        const worldToTankPx = (valX) => (w * 0.55) + (valX - targetX) * mapScale;
+        const targetPx = toTankPx(targetX);
+        const landPx = Math.max(90, Math.min(w - 20, toTankPx(currentX)));
 
-        const targetPxX = worldToTankPx(targetX);
-        const landPxX = Math.max(95, Math.min(w - 20, worldToTankPx(currentX)));
-
-        // 1. Vẽ Bia Mục Tiêu
+        // Bia mục tiêu
         tCtx.fillStyle = "#ef4444";
-        tCtx.beginPath();
-        tCtx.arc(targetPxX, groundY - 14, 14, 0, Math.PI * 2);
-        tCtx.fill();
-        tCtx.fillStyle = "#ffffff";
-        tCtx.beginPath();
-        tCtx.arc(targetPxX, groundY - 14, 8, 0, Math.PI * 2);
-        tCtx.fill();
-        tCtx.fillStyle = "#ef4444";
-        tCtx.beginPath();
-        tCtx.arc(targetPxX, groundY - 14, 4, 0, Math.PI * 2);
-        tCtx.fill();
-
+        tCtx.beginPath(); tCtx.arc(targetPx, groundY - 12, 12, 0, Math.PI * 2); tCtx.fill();
+        tCtx.fillStyle = "#fff";
+        tCtx.beginPath(); tCtx.arc(targetPx, groundY - 12, 6, 0, Math.PI * 2); tCtx.fill();
         tCtx.fillStyle = "#4ade80";
-        tCtx.font = "bold 12px sans-serif";
-        tCtx.fillText("🎯 MỤC TIÊU", targetPxX - 36, groundY + 20);
-
-        // 2. Vẽ Xe Tăng AI
-        tCtx.fillStyle = "#38bdf8";
-        tCtx.fillRect(tankX - 22, groundY - 16, 44, 16);
-        tCtx.beginPath();
-        tCtx.arc(tankX, groundY - 16, 12, Math.PI, 0);
-        tCtx.fill();
-        // Nòng pháo
-        tCtx.strokeStyle = "#7dd3fc";
-        tCtx.lineWidth = 5;
-        tCtx.beginPath();
-        tCtx.moveTo(tankX + 6, groundY - 22);
-        tCtx.lineTo(tankX + 28, groundY - 34);
-        tCtx.stroke();
-
-        tCtx.fillStyle = "#94a3b8";
         tCtx.font = "bold 11px sans-serif";
-        tCtx.fillText(`Lực x = ${currentX.toFixed(2)}`, tankX - 30, groundY + 20);
+        tCtx.fillText("🎯 ĐÍCH", targetPx - 22, groundY + 18);
 
-        // 3. Vẽ Quỹ đạo đạn dự kiến (nét đứt mờ)
-        const midX = (tankX + 25 + landPxX) / 2;
-        const arcHeight = Math.min(130, Math.max(50, Math.abs(landPxX - tankX) * 0.35));
+        // Xe tăng AI
+        tCtx.fillStyle = "#38bdf8";
+        tCtx.fillRect(tankX - 20, groundY - 14, 40, 14);
+        tCtx.beginPath(); tCtx.arc(tankX, groundY - 14, 11, Math.PI, 0); tCtx.fill();
+        tCtx.strokeStyle = "#7dd3fc";
+        tCtx.lineWidth = 4;
+        tCtx.beginPath(); tCtx.moveTo(tankX + 5, groundY - 18); tCtx.lineTo(tankX + 25, groundY - 30); tCtx.stroke();
+        tCtx.fillStyle = "#94a3b8";
+        tCtx.fillText(`x = ${currentX.toFixed(2)}`, tankX - 22, groundY + 18);
 
+        // Quỹ đạo đạn
+        const midX = (tankX + 25 + landPx) / 2;
+        const arcH = Math.min(110, Math.max(40, Math.abs(landPx - tankX) * 0.32));
         tCtx.strokeStyle = "rgba(148, 163, 184, 0.3)";
         tCtx.setLineDash([4, 4]);
-        tCtx.lineWidth = 1.5;
         tCtx.beginPath();
-        tCtx.moveTo(tankX + 28, groundY - 34);
-        tCtx.quadraticCurveTo(midX, groundY - 34 - arcHeight, landPxX, groundY - 4);
+        tCtx.moveTo(tankX + 25, groundY - 30);
+        tCtx.quadraticCurveTo(midX, groundY - 30 - arcH, landPx, groundY - 4);
         tCtx.stroke();
         tCtx.setLineDash([]);
 
-        // 4. Vẽ Đạn bay & Nổ theo giai đoạn
         if (animPhase === "FLYING") {
             const t = projectile.progress;
-            const startX = tankX + 28, startY = groundY - 34;
-            const ctrlX = midX, ctrlY = groundY - 34 - arcHeight;
-            const endX = landPxX, endY = groundY - 4;
-
-            // Công thức Bezier bậc 2
-            const bx = (1 - t) * (1 - t) * startX + 2 * (1 - t) * t * ctrlX + t * t * endX;
-            const by = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * ctrlY + t * t * endY;
-
+            const bx = (1 - t) * (1 - t) * (tankX + 25) + 2 * (1 - t) * t * midX + t * t * landPx;
+            const by = (1 - t) * (1 - t) * (groundY - 30) + 2 * (1 - t) * t * (groundY - 30 - arcH) + t * t * (groundY - 4);
             tCtx.fillStyle = "#fbbf24";
-            tCtx.beginPath();
-            tCtx.arc(bx, by, 6, 0, Math.PI * 2);
-            tCtx.fill();
-        } else if (animPhase === "EXPLODED" || animPhase === "MOVING" || shotCount > 0) {
-            // Vẽ vụ nổ tại điểm rơi
-            const isHit = Math.abs(currentX - targetX) < 0.15;
-            tCtx.fillStyle = isHit ? "rgba(34, 197, 94, 0.35)" : "rgba(239, 68, 68, 0.35)";
-            tCtx.beginPath();
-            tCtx.arc(landPxX, groundY - 6, 18, 0, Math.PI * 2);
-            tCtx.fill();
-
-            // Vẽ thước đo độ lệch giữa Điểm đạn nổ và Mục tiêu
-            if (!isHit) {
-                tCtx.strokeStyle = "#f59e0b";
-                tCtx.lineWidth = 2;
-                tCtx.beginPath();
-                tCtx.moveTo(landPxX, groundY - 42);
-                tCtx.lineTo(targetPxX, groundY - 42);
-                tCtx.stroke();
-
-                const diff = currentX - targetX;
-                tCtx.fillStyle = "#fbbf24";
-                tCtx.font = "bold 12px sans-serif";
-                const errText = diff < 0 ? `Bắn hụt ${Math.abs(diff).toFixed(2)}m (Tăng lực 👉)` : `Bắn lố +${diff.toFixed(2)}m (👈 Giảm lực)`;
-                tCtx.fillText(errText, (landPxX + targetPxX) / 2 - 65, groundY - 50);
-            } else {
-                tCtx.fillStyle = "#4ade80";
-                tCtx.font = "bold 14px sans-serif";
-                tCtx.fillText("💥 BẮN TRÚNG ĐÍCH! (Sai số ≈ 0)", targetPxX - 95, groundY - 48);
-            }
+            tCtx.beginPath(); tCtx.arc(bx, by, 5.5, 0, Math.PI * 2); tCtx.fill();
+        } else if (shotCount > 0) {
+            const isHit = Math.abs(currentX - targetX) < 0.12;
+            tCtx.fillStyle = isHit ? "rgba(34, 197, 94, 0.4)" : "rgba(239, 68, 68, 0.4)";
+            tCtx.beginPath(); tCtx.arc(landPx, groundY - 5, 15, 0, Math.PI * 2); tCtx.fill();
         }
     }
 
-    // ================= VÒNG LẶP HOẠT ẢNH CHÍNH =================
     function mainLoop() {
-        // Cập nhật trạng thái hoạt ảnh
         if (animPhase === "FLYING") {
-            projectile.progress += 0.04;
+            projectile.progress += 0.045;
             if (projectile.progress >= 1) {
                 animPhase = "EXPLODED";
                 explosionTimer = 0;
                 const slope = df(currentX);
-                const nextX = currentX - learningRate * slope;
+                const nextX = computeSafeNextX(currentX, slope);
                 appendHistoryLog(shotCount, currentX, slope, nextX);
-                updateThoughtBubble();
+                updateStatusText();
             }
         } else if (animPhase === "EXPLODED") {
             explosionTimer++;
-            if (explosionTimer > 38) { // Dừng 0.6 giây để cả lớp nhìn rõ lỗi sai
+            if (explosionTimer > 30) {
                 const slope = df(currentX);
-                if (Math.abs(slope) < 0.03) {
+                if (Math.abs(slope) < 0.04) {
                     animPhase = "IDLE";
                     stopAutoPlay();
-                    updateThoughtBubble();
+                    updateStatusText();
                 } else {
                     animPhase = "MOVING";
                     moveAnim.progress = 0;
                     moveAnim.fromX = currentX;
-                    moveAnim.toX = Math.max(-xRange * 1.5, Math.min(xRange * 1.5, currentX - learningRate * slope));
+                    moveAnim.toX = computeSafeNextX(currentX, slope);
                 }
             }
         } else if (animPhase === "MOVING") {
-            moveAnim.progress += 0.06;
+            moveAnim.progress += 0.07;
             if (moveAnim.progress >= 1) {
                 currentX = moveAnim.toX;
                 historyPoints.push({ x: currentX, y: f(currentX) });
                 animPhase = "IDLE";
-                updateThoughtBubble();
-
-                // Nếu đang bật Tự Học Liên Tục thì tự động bắn phát tiếp theo
+                updateStatusText();
                 if (isAutoPlaying) {
-                    setTimeout(() => {
-                        if (isAutoPlaying && animPhase === "IDLE") startShotCycle();
-                    }, 350);
+                    setTimeout(() => { if (isAutoPlaying && animPhase === "IDLE") startShotCycle(); }, 280);
                 }
             } else {
                 currentX = moveAnim.fromX + (moveAnim.toX - moveAnim.fromX) * moveAnim.progress;
@@ -1111,8 +1471,8 @@
         requestAnimationFrame(mainLoop);
     }
 
-    // Khởi chạy ban đầu
-    applyEquationInternal("(x - 2)^2", -2.5);
+    // Khởi chạy mặc định
+    applyEquation(-2.5);
     requestAnimationFrame(mainLoop);
 </script>
 </body>
